@@ -1,0 +1,8 @@
+mouse_strain,C57BL
+mouse_life_stage,Late adult
+parameter_name,Periphery average speed
+parameter_id,JAX_OFD_013_001
+analysis_id,1c013nowp2dyz33
+gene_symbol,Mlx
+pvalue,0.5214177
+gene_accession_id,MGI:108398

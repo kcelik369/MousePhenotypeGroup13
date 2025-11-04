@@ -1,0 +1,8 @@
+gene_accession_id,MGI:108398
+gene_symbol,Mlx
+mouse_strain,C59BL
+mouse_life_stage,Late adult
+parameter_id,IMPC_ABR_006_001
+pvalue,0.9104556
+parameter_name,12kHz-evoked ABR Threshold
+analysis_id,zm65582z54jn982

@@ -1,0 +1,8 @@
+gene_accession_id,MGI:98930
+gene_symbol,Vil1
+mouse_strain,C57BL
+mouse_life_stage,Early adult
+parameter_id,CCP_LDT_006_001
+pvalue,0.1323567
+parameter_name,Latency to first transition into light
+analysis_id,bwmc7dq5q568ve0

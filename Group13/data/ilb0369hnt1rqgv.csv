@@ -1,0 +1,8 @@
+gene_accession_id,MGI:88357
+gene_symbol,Cdk4
+mouse_strain,C57BL
+mouse_life_stage,E15.5
+parameter_id,CCP_LDT_006_001
+pvalue,0.2200964
+parameter_name,Latency to first transition into light
+analysis_id,ilb0369hnt1rqgv

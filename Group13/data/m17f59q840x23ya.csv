@@ -1,0 +1,8 @@
+gene_accession_id,MGI:1890257
+gene_symbol,Tas2r103
+mouse_strain,C57BL
+mouse_life_stage,Early adult
+parameter_id,IMPC_ABR_006_001
+pvalue,0.08079774
+parameter_name,12kHz-evoked ABR Threshold
+analysis_id,m17f59q840x23ya

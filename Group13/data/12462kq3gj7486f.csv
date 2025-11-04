@@ -1,0 +1,8 @@
+gene_accession_id,MGI:105959
+gene_symbol,Cox8a
+mouse_strain,C57BL
+mouse_life_stage,Early adult
+parameter_id,IMPC_ABR_006_001
+pvalue,0.7518726
+parameter_name,12kHz-evoked ABR Threshold
+analysis_id,12462kq3gj7486f

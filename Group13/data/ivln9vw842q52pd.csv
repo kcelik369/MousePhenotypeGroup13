@@ -1,0 +1,8 @@
+parameter_id,IMPC_HEM_007_001
+parameter_name,Mean cell hemoglobin concentration
+gene_symbol,Cdk4
+gene_accession_id,MGI:88357
+mouse_life_stage,E15.5
+analysis_id,ivln9vw842q52pd
+pvalue,0.2848727
+mouse_strain,C57BL

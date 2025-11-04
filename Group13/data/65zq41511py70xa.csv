@@ -1,0 +1,8 @@
+gene_accession_id,MGI:1333863
+gene_symbol,Pde3b
+mouse_strain,C57BL
+mouse_life_stage,Early adult
+parameter_id,IMPC_ABR_004_001
+pvalue,0.5121281
+parameter_name,6kHz-evoked ABR Threshold
+analysis_id,65zq41511py70xa
