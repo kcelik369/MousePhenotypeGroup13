@@ -1,0 +1,71 @@
+---
+title: "procedureClean"
+format: html
+---
+
+```{r}
+# read in the IMPC procedures file
+proc_filepath = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/IMPC_procedure.csv"
+proc_file = fread(proc_filepath)
+```
+
+```{r}
+# group by redundant columns, then use summarise to 
+# create a list of all impcParameterOrigId values for the grouped redundant rows
+collapsed_df = proc_file %>% group_by(name, description, isMandatory) %>% summarise(impcParameterOrigIds=list(impcParameterOrigId))
+head(collapsed_df)
+```
+
+
+```{r}
+# add a new row "procedure_group_id", will be foreign key down the line
+collapsed_df$procedure_group_id = c(1:nrow(collapsed_df))
+head(collapsed_df)
+
+```
+
+```{r}
+# write out the cleaned table to a new file
+new_filepath = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/IMPC_procedure_clean.csv"
+fwrite(collapsed_df, new_filepath)
+```
+
+```{r}
+# read in the cleaned IMPC_param_dsc CSV and add column with the "procedure_group_id"
+param_descs_clean_filepath = "./IMPC_parameter_description_clean.csv"
+param_descs_clean = fread(param_descs_clean_filepath)
+head(param_descs_clean)
+```
+
+```{r}
+# create a new numerical column to store parameter group id (new fkey)
+param_descs_clean[,"impcParameterGroupId"] = 0
+head(param_descs_clean)
+```
+
+
+```{r}
+# for all rows in the cleaned parameter descriptions file, add the new foreign key for 
+# our procedure table; preserve impc_parameter_orig_id just in case necessary later on.
+for (i in 1:nrow(param_descs_clean)) {
+  if (i%%1000 == 0) { print(i) } # progress bar (sort of)
+  for (j in 1:nrow(collapsed_df)) {
+    # find which group of impc_parameter_orig_ids now holds the current row's
+    if (param_descs_clean[i,]$impc_parameter_orig_id %in% collapsed_df[j,]$impcParameterOrigIds[[1]]) {
+      param_descs_clean[i,5] = collapsed_df[j,]$procedure_group_id # insert into new column of current row
+      break
+    }
+  }
+}
+head(param_descs_clean)
+```
+
+```{r}
+fwrite(param_descs_clean, param_descs_clean_filepath)
+```
+
+```{r}
+# x = colnames(param_descs_clean)[1]
+# param_descs_clean[[x]]
+```
+
