@@ -1,154 +1,227 @@
 library(shiny)
-library(ggplot2)
 library(dplyr)
-library(tidyr)   # for pivot_wider
+library(tidyr)
+library(ggplot2)
 library(plotly)
-library(DBI)
-library(RMariaDB)
 
-# 1. Load cleaned data
-Cleaned_combined <- read.csv(
+# ----------------------- Load + Clean Data -----------------------
+
+cleaned_combined <- read.csv(
   "/Users/linakhalid/Downloads/Group13/Cleaned_combined.csv",
   stringsAsFactors = FALSE
 )
 
-# 2. Prepare score_data with clear names
-score_data <- Cleaned_combined %>%
+score_data <- cleaned_combined %>%
   transmute(
-    GENE_ACCESSION_ID,
-    ANALYSIS_ID,
-    GENE_SYMBOL    = toupper(GENE_SYMBOL),   # gene
-    PHENOTYPE_ID   = PARAMETER_ID,           # short ID
-    PHENOTYPE_NAME = PARAMETER_NAME,         # readable label
-    P_VALUE        = as.numeric(PVALUE)      # numeric p-value
+    STRAIN         = MOUSE_STRAIN,
+    GENE_SYMBOL    = toupper(GENE_SYMBOL),
+    PHENOTYPE      = PARAMETER_ID,
+    PHENOTYPE_NAME = PARAMETER_NAME,
+    P_VALUE        = as.numeric(PVALUE)
   ) %>%
   distinct()
 
-# ---------------- UI ----------------
+# ------------------------------ UI -------------------------------
+
 ui <- fluidPage(
   titlePanel("IMPC Phenotype Dashboard"),
   
   sidebarLayout(
     sidebarPanel(
-      h4("Filters"),
-      selectInput("gene", "Select gene:",
-                  choices = sort(unique(score_data$GENE_SYMBOL))),
-      selectInput("phen", "Select phenotype (ID):",
-                  choices = sort(unique(score_data$PHENOTYPE_ID))),
-      sliderInput("cutoff", "P-value cutoff:",
-                  min = 0, max = 1, value = 0.05)
+      # Show these filters ONLY on the Per Gene View tab
+      conditionalPanel(
+        condition = "input.mainTab == 'geneTab'",
+        
+        h4("Filters"),
+        
+        selectInput("strain", "Select Mouse Strain:",
+                    choices = c("All", sort(unique(score_data$STRAIN))),
+                    selected = "All"),
+        
+        selectInput("gene", "Select Knockout Gene:",
+                    choices = sort(unique(score_data$GENE_SYMBOL)),
+                    selected = sort(unique(score_data$GENE_SYMBOL))[1]),
+        
+        sliderInput("cutoff", "P-value cutoff:",
+                    min = 0, max = 1, value = 0.05)
+      )
     ),
     
     mainPanel(
       tabsetPanel(
-        tabPanel("Per Gene View",
-                 plotlyOutput("genePlot")
+        id = "mainTab",
+        
+        # ----------------------- Per Gene View -----------------------
+        tabPanel(
+          "Per Gene View",
+          value = "geneTab",
+          plotlyOutput("genePlot")
         ),
-        tabPanel("Per Phenotype View",
-                 plotlyOutput("phenPlot")
+        
+        # -------------------- Per Phenotype View --------------------
+        tabPanel(
+          "Per Phenotype View",
+          value = "phenTab",
+          
+          fluidRow(
+            column(
+              6,
+              # label set to NULL to REMOVE "Select Phenotype:" text
+              selectInput(
+                "phen", 
+                label   = NULL, 
+                choices = sort(unique(score_data$PHENOTYPE)),
+                selected = sort(unique(score_data$PHENOTYPE))[1]
+              )
+            )
+          ),
+          
+          plotlyOutput("phenPlot")
         ),
-        tabPanel("Gene Clusters",
-                 plotOutput("clusterPlot")
+        
+        # -------------------------- Heatmap -------------------------
+        tabPanel(
+          "Gene Clusters",
+          value = "clusterTab",
+          plotOutput("clusterPlot")
         )
       )
     )
   )
 )
 
-# ---------------- SERVER ----------------
+# ------------------------------ SERVER ----------------------------
+
 server <- function(input, output, session) {
   
-  # Filter data for selected gene
+  # -------- Dynamically update gene list when strain changes --------
+  observeEvent(input$strain, {
+    available_genes <- score_data %>%
+      filter(if (input$strain != "All") STRAIN == input$strain else TRUE) %>%
+      pull(GENE_SYMBOL) %>%
+      unique() %>%
+      sort()
+    
+    updateSelectInput(session, "gene",
+                      choices  = available_genes,
+                      selected = available_genes[1])
+  })
+  
+  # ---------------------------- Reactives ---------------------------
+  filtered_data <- reactive({
+    if (is.null(input$strain) || input$strain == "All") return(score_data)
+    score_data %>% filter(STRAIN == input$strain)
+  })
+  
   gene_data <- reactive({
-    score_data %>% 
-      filter(GENE_SYMBOL == input$gene)
+    req(input$gene)
+    filtered_data() %>% filter(GENE_SYMBOL == input$gene)
   })
   
-  # Filter data for selected phenotype
   phen_data <- reactive({
-    score_data %>% 
-      filter(PHENOTYPE_ID == input$phen)
+    req(input$phen)
+    score_data %>% filter(PHENOTYPE == input$phen)
   })
   
-  # Plot 1: Per Gene View
+  # ------------------------ Plot 1: Per Gene ------------------------
   output$genePlot <- renderPlotly({
     df <- gene_data()
-    if (nrow(df) == 0) return(NULL)
+    
+    if (nrow(df) == 0) {
+      return(
+        plotly_empty(type = "scatter") %>%
+          layout(title = "No data available for this strain + gene")
+      )
+    }
     
     p <- ggplot(df, aes(
-      x = seq_len(nrow(df)),
+      x = PHENOTYPE,
       y = P_VALUE,
-      text = paste(
-        "Phenotype ID:", PHENOTYPE_ID,
-        "<br>Name:", PHENOTYPE_NAME,
-        "<br>P-value:", signif(P_VALUE, 3)
+      text = paste0(
+        "<b>Phenotype ID:</b> ", PHENOTYPE,
+        "<br><b>Phenotype Name:</b> ", PHENOTYPE_NAME,
+        "<br><b>P-value:</b> ", P_VALUE
       )
     )) +
       geom_point(size = 3) +
       geom_hline(yintercept = input$cutoff, linetype = "dashed") +
-      labs(x = "Phenotype (index)", y = "P_VALUE") +
-      theme_bw()
+      labs(x = "Phenotype", y = "P-value") +
+      theme_bw() +
+      theme(
+        axis.text.x  = element_blank(),
+        axis.ticks.x = element_blank()
+      )
     
     ggplotly(p, tooltip = "text")
   })
   
-  # Plot 2: Per Phenotype View
+  # ---------------------- Plot 2: Per Phenotype ---------------------
   output$phenPlot <- renderPlotly({
     df <- phen_data()
-    if (nrow(df) == 0) return(NULL)
+    
+    if (nrow(df) == 0) {
+      return(
+        plotly_empty(type = "scatter") %>%
+          layout(title = "No data available for this phenotype")
+      )
+    }
+    
+    phen_id   <- unique(df$PHENOTYPE)
+    phen_name <- unique(df$PHENOTYPE_NAME)
+    
+    # Use gene INDEX on x-axis so labels don't get smushed
+    df$gene_index <- seq_len(nrow(df))
     
     p <- ggplot(df, aes(
-      x = seq_len(nrow(df)),
+      x = gene_index,
       y = P_VALUE,
-      text = paste(
-        "Gene:", GENE_SYMBOL,
-        "<br>Phenotype name:", PHENOTYPE_NAME,
-        "<br>P-value:", signif(P_VALUE, 3)
+      text = paste0(
+        "<b>Gene:</b> ", GENE_SYMBOL,
+        "<br><b>Phenotype ID:</b> ", PHENOTYPE,
+        "<br><b>Phenotype Name:</b> ", PHENOTYPE_NAME,
+        "<br><b>P-value:</b> ", P_VALUE
       )
     )) +
       geom_point(size = 3) +
-      geom_hline(yintercept = input$cutoff, linetype = "dashed") +
-      labs(x = "Gene (index)", y = "P_VALUE") +
-      theme_bw()
+      geom_hline(yintercept = 0.05, linetype = "dashed") +
+      labs(
+        title = paste0(phen_id, " — ", phen_name),
+        x = "Gene index",
+        y = "P-value"
+      ) +
+      theme_bw() +
+      theme(
+        axis.text.x  = element_blank(),
+        axis.ticks.x = element_blank()
+      )
     
     ggplotly(p, tooltip = "text")
   })
   
-  # Plot 3: Gene Clusters (heatmap of gene × phenotype p-values)
+  # --------------------------- Heatmap ------------------------------
   output$clusterPlot <- renderPlot({
-    
-    # 1. Build wide matrix: genes x phenotypes
     wide_df <- score_data %>%
-      group_by(GENE_SYMBOL, PHENOTYPE_ID) %>%
+      group_by(GENE_SYMBOL, PHENOTYPE) %>%
       summarise(P_VALUE = mean(P_VALUE, na.rm = TRUE), .groups = "drop") %>%
-      pivot_wider(names_from = PHENOTYPE_ID, values_from = P_VALUE)
+      pivot_wider(names_from = PHENOTYPE, values_from = P_VALUE)
     
-    # 2. Convert to numeric matrix
     mat <- as.data.frame(wide_df)
     rownames(mat) <- mat$GENE_SYMBOL
     mat$GENE_SYMBOL <- NULL
     mat <- as.matrix(mat)
     
-    # Guard against all-NA (just in case)
-    if (all(is.na(mat))) return(NULL)
-    
-    # 3. Replace missing values & transform to -log10(p)
     mat[is.na(mat)] <- median(mat, na.rm = TRUE)
     mat <- -log10(mat)
     
-    # 4. Select top variable genes & phenotypes (20 × 20)
     gene_var <- apply(mat, 1, var)
     phen_var <- apply(mat, 2, var)
     
     top_genes <- names(sort(gene_var, decreasing = TRUE))[1:min(20, nrow(mat))]
     top_phens <- names(sort(phen_var, decreasing = TRUE))[1:min(20, ncol(mat))]
     
-    mat_sub <- mat[top_genes, top_phens, drop = FALSE]
-    
-    # 5. Scale matrix to balance colours 
+    mat_sub    <- mat[top_genes, top_phens, drop = FALSE]
     mat_scaled <- scale(mat_sub)
     
-    # 6. Draw heatmap 
     heatmap(mat_scaled,
             scale   = "none",
             col     = heat.colors(100),
@@ -156,7 +229,6 @@ server <- function(input, output, session) {
             ylab    = "Genes",
             margins = c(10, 10))
   })
-  
 }
 
 shinyApp(ui = ui, server = server)
