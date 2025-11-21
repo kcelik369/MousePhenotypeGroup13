@@ -1,33 +1,40 @@
 library(shiny)
 library(ggplot2)
 library(dplyr)
-library(tidyr)   # <-- needed for pivot_wider
+library(tidyr)   # for pivot_wider
 library(plotly)
+library(DBI)
+library(RMariaDB)
 
-combined_data <- read.csv(
-  "/Users/linakhalid/Downloads/Group13/combined_data.csv",
+# 1. Load cleaned data
+Cleaned_combined <- read.csv(
+  "/Users/linakhalid/Downloads/Group13/Cleaned_combined.csv",
   stringsAsFactors = FALSE
 )
 
-score_data <- combined_data %>%
+# 2. Prepare score_data with clear names
+score_data <- Cleaned_combined %>%
   transmute(
-    GENE_SYMBOL = toupper(GENE_SYMBOL),   # gene
-    PHENOTYPE   = PARAMETER_ID,           # phenotype tested
-    P_VALUE     = as.numeric(PVALUE)      # p-value column
+    GENE_ACCESSION_ID,
+    ANALYSIS_ID,
+    GENE_SYMBOL    = toupper(GENE_SYMBOL),   # gene
+    PHENOTYPE_ID   = PARAMETER_ID,           # short ID
+    PHENOTYPE_NAME = PARAMETER_NAME,         # readable label
+    P_VALUE        = as.numeric(PVALUE)      # numeric p-value
   ) %>%
   distinct()
 
-
+# ---------------- UI ----------------
 ui <- fluidPage(
   titlePanel("IMPC Phenotype Dashboard"),
   
   sidebarLayout(
     sidebarPanel(
       h4("Filters"),
-      selectInput("gene", "Select Gene:",
+      selectInput("gene", "Select gene:",
                   choices = sort(unique(score_data$GENE_SYMBOL))),
-      selectInput("phen", "Select Phenotype:",
-                  choices = sort(unique(score_data$PHENOTYPE))),
+      selectInput("phen", "Select phenotype (ID):",
+                  choices = sort(unique(score_data$PHENOTYPE_ID))),
       sliderInput("cutoff", "P-value cutoff:",
                   min = 0, max = 1, value = 0.05)
     ),
@@ -48,8 +55,8 @@ ui <- fluidPage(
   )
 )
 
-
-server <- function(input, output) {
+# ---------------- SERVER ----------------
+server <- function(input, output, session) {
   
   # Filter data for selected gene
   gene_data <- reactive({
@@ -60,16 +67,22 @@ server <- function(input, output) {
   # Filter data for selected phenotype
   phen_data <- reactive({
     score_data %>% 
-      filter(PHENOTYPE == input$phen)
+      filter(PHENOTYPE_ID == input$phen)
   })
   
   # Plot 1: Per Gene View
   output$genePlot <- renderPlotly({
-    p <- ggplot(gene_data(), aes(
-      x = seq_len(nrow(gene_data())),
+    df <- gene_data()
+    if (nrow(df) == 0) return(NULL)
+    
+    p <- ggplot(df, aes(
+      x = seq_len(nrow(df)),
       y = P_VALUE,
-      text = paste("Phenotype:", PHENOTYPE,
-                   "<br>P-value:", P_VALUE)
+      text = paste(
+        "Phenotype ID:", PHENOTYPE_ID,
+        "<br>Name:", PHENOTYPE_NAME,
+        "<br>P-value:", signif(P_VALUE, 3)
+      )
     )) +
       geom_point(size = 3) +
       geom_hline(yintercept = input$cutoff, linetype = "dashed") +
@@ -81,11 +94,17 @@ server <- function(input, output) {
   
   # Plot 2: Per Phenotype View
   output$phenPlot <- renderPlotly({
-    p <- ggplot(phen_data(), aes(
-      x = seq_len(nrow(phen_data())),
+    df <- phen_data()
+    if (nrow(df) == 0) return(NULL)
+    
+    p <- ggplot(df, aes(
+      x = seq_len(nrow(df)),
       y = P_VALUE,
-      text = paste("Gene:", GENE_SYMBOL,
-                   "<br>P-value:", P_VALUE)
+      text = paste(
+        "Gene:", GENE_SYMBOL,
+        "<br>Phenotype name:", PHENOTYPE_NAME,
+        "<br>P-value:", signif(P_VALUE, 3)
+      )
     )) +
       geom_point(size = 3) +
       geom_hline(yintercept = input$cutoff, linetype = "dashed") +
@@ -95,22 +114,23 @@ server <- function(input, output) {
     ggplotly(p, tooltip = "text")
   })
   
-  # Plot 3: Gene Clusters (real heatmap of gene × phenotype p-values)
+  # Plot 3: Gene Clusters (heatmap of gene × phenotype p-values)
   output$clusterPlot <- renderPlot({
-    library(dplyr)
-    library(tidyr)
     
     # 1. Build wide matrix: genes x phenotypes
     wide_df <- score_data %>%
-      group_by(GENE_SYMBOL, PHENOTYPE) %>%
+      group_by(GENE_SYMBOL, PHENOTYPE_ID) %>%
       summarise(P_VALUE = mean(P_VALUE, na.rm = TRUE), .groups = "drop") %>%
-      pivot_wider(names_from = PHENOTYPE, values_from = P_VALUE)
+      pivot_wider(names_from = PHENOTYPE_ID, values_from = P_VALUE)
     
     # 2. Convert to numeric matrix
     mat <- as.data.frame(wide_df)
     rownames(mat) <- mat$GENE_SYMBOL
     mat$GENE_SYMBOL <- NULL
     mat <- as.matrix(mat)
+    
+    # Guard against all-NA (just in case)
+    if (all(is.na(mat))) return(NULL)
     
     # 3. Replace missing values & transform to -log10(p)
     mat[is.na(mat)] <- median(mat, na.rm = TRUE)
@@ -136,7 +156,6 @@ server <- function(input, output) {
             ylab    = "Genes",
             margins = c(10, 10))
   })
-  
   
 }
 
