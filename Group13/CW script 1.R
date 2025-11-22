@@ -572,7 +572,71 @@ df <- read.csv("output/gene_symbols_corrected.csv", stringsAsFactors = FALSE)
 
 results <- check_id_gene_consistency(df)
 
-# 7. Function that removes any row duplicates
+#7. Function that checks MOUSE_STRAIN
+validate_mouse_strain <- function(
+    input_csv,
+    output_csv = "output/mouse_strain_cleaned.csv",
+    output_excel = "output/mouse_strain_invalid_highlight.xlsx",
+    column = "MOUSE_STRAIN",
+    allowed = c("C57BL", "B6J", "C3H", "129SV")
+) {
+  df <- read.csv(input_csv, stringsAsFactors = FALSE)
+  if (!column %in% names(df)) stop(paste("Column", column, "missing."))
+  
+  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  
+  df_original <- df
+  df[[column]] <- trimws(df[[column]])
+  
+  invalid <- !(df[[column]] %in% allowed)
+  df[[column]][invalid] <- NA
+  
+  write.csv(df, output_csv, row.names = FALSE)
+  
+  wb <- createWorkbook()
+  addWorksheet(wb, "Data")
+  writeData(wb, "Data", df_original)
+  addStyle(
+    wb, "Data", createStyle(fgFill = "red"),
+    rows = which(invalid) + 1,
+    cols = which(names(df) == column),
+    gridExpand = TRUE
+  )
+  saveWorkbook(wb, output_excel, overwrite = TRUE)
+  
+  df
+}
+
+validate_mouse_strain("output/gene_symbols_corrected.csv")
+
+
+#8. Function that capitalizes all values for GENE_ACCESSION_ID and PARAMETER_ID
+capitalize_gene_and_parameter_ids <- function(
+    input_csv,
+    output_csv = "output/capitalized_ids.csv",
+    cols = c("GENE_ACCESSION_ID", "PARAMETER_ID")
+) {
+  
+  df <- read.csv(input_csv, stringsAsFactors = FALSE)
+  
+  # Create output folder if needed
+  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  
+  # Capitalize values
+  for (col in cols) {
+    df[[col]] <- toupper(trimws(df[[col]]))
+  }
+  
+  # Save updated CSV
+  write.csv(df, output_csv, row.names = FALSE)
+  
+  df
+}
+
+capitalize_gene_and_parameter_ids("output/mouse_strain_cleaned.csv")
+
+
+# 9. Function that removes any row duplicates
 
 # Load the necessary libraries
 library(dplyr)
@@ -607,5 +671,7 @@ if (!is.null(duplicate_rows)) {
 } else {
   message("No duplicate rows in the file.")
 }
+
+
 
 
