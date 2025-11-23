@@ -636,7 +636,65 @@ capitalize_gene_and_parameter_ids <- function(
 capitalize_gene_and_parameter_ids("output/mouse_strain_cleaned.csv")
 
 
-# 9. Function that removes any row duplicates
+#9. Function that removes all non-IMPC values for PARAMETER_ID
+clean_parameter_id_prefix <- function(
+    input_csv,
+    output_csv = "output/parameter_id_cleaned.csv",
+    output_excel = "output/parameter_id_invalid_highlight.xlsx",
+    column = "PARAMETER_ID"
+) {
+  
+  # Read data
+  df <- read.csv(input_csv, stringsAsFactors = FALSE)
+  
+  # Create output folder if absent
+  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  
+  df_original <- df
+  
+  # Trim whitespace
+  df[[column]] <- trimws(df[[column]])
+  
+  # Identify invalid values = those NOT starting with IMPC
+  invalid <- !grepl("^IMPC", df[[column]], ignore.case = FALSE)
+  
+  # Replace invalid values with NA
+  df[[column]][invalid] <- NA
+  
+  # Save cleaned CSV
+  write.csv(df, output_csv, row.names = FALSE)
+  
+  # Create Excel highlighting original invalid values
+  wb <- createWorkbook()
+  addWorksheet(wb, "Data")
+  writeData(wb, "Data", df_original)
+  
+  red_style <- createStyle(fgFill = "red")
+  
+  if (any(invalid)) {
+    addStyle(
+      wb, "Data", red_style,
+      rows = which(invalid) + 1,   # offset for header
+      cols = which(names(df) == column),
+      gridExpand = TRUE
+    )
+  }
+  
+  saveWorkbook(wb, output_excel, overwrite = TRUE)
+  
+  message("Finished.\n",
+          "Cleaned CSV saved to: ", output_csv, "\n",
+          "Excel with highlighted invalid PARAMETER_ID values saved to: ", output_excel)
+  
+  return(df)
+}
+
+clean_parameter_id_prefix("output/capitalized_ids.csv")
+
+
+
+
+# 10. Function that removes any row duplicates
 
 # Load the necessary libraries
 library(dplyr)
