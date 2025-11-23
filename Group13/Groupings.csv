@@ -1,0 +1,25 @@
+impc_parameter_orig_id,name,description,parameter_id
+38103,Coat - color - back,coat_color_back,IMPC_CSD_005_001
+38104,Coat - color - head,coat_color_head,IMPC_CSD_006_001
+38105,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
+38106,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
+38107,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
+38108,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
+38111,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
+38114,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
+31885,Coat - color - back,coat_color_back,IMPC_CSD_005_001
+31886,Coat - color - head,coat_color_head,IMPC_CSD_006_001
+31887,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
+31888,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
+31889,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
+31890,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
+31893,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
+31896,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
+16829,Coat - color - back,coat_color_back,IMPC_CSD_005_001
+16830,Coat - color - head,coat_color_head,IMPC_CSD_006_001
+16831,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
+16832,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
+16833,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
+16834,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
+16837,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
+16840,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
