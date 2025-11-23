@@ -1,0 +1,145 @@
+---
+title: "groupingTables"
+format: html
+---
+
+
+### FILE USAGE
+- This file format the diseases table, and modifies the table to obey first normal form by creating a new table to hold the lists of OMIM IDs.
+
+```{r}
+library(data.table)
+library(dplyr)
+library(readr)
+library(stringr)
+```
+
+```{r}
+# load diseases table
+disease_filepath = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/Disease_information.csv"
+disease_df = fread(disease_filepath)
+head(disease_df,3)
+```
+
+```{r}
+# create a method to convert string fields to numbers
+my_cut = function (my_str, my_start=1) {
+  str_len = nchar(my_str)
+  cut_str = as.integer(substr(my_str, my_start, str_len))
+  return (cut_str)
+}
+
+# TODO: uncomment cleaning steps once main merged table matches here
+# disease_df$`DO Disease ID` = sapply(disease_df$`DO Disease ID`, my_cut, my_start=6)
+# disease_df$`Mouse MGI ID` = sapply(disease_df$`Mouse MGI ID`, my_cut, my_start=5)
+head(disease_df,3)
+```
+
+```{r}
+# to obey first normal form principle of databases, move list of omim_ids
+# into its own table linking an omim_id to an omim_group_id
+omim_group_col_names = c("group_id", "omim_id")
+omim_group_df = data.frame(matrix(nrow = 0, ncol = 2))
+colnames(omim_group_df) = omim_group_col_names
+omim_group_id = 1:nrow(disease_df)
+
+#TODO: also remove "OMIM:" prefix to transform OMIM IDs into numbers as well
+disease_df = cbind(disease_df, omim_group_id) # create the new column
+for (i in 1:nrow(disease_df)) {
+  # get list of omim_ids for each row
+  curr_omim_ids = disease_df[i,]$`OMIM IDs`
+  
+  # split on the | character, requires regex; get list of split strings
+  omim_list = as.list(strsplit(curr_omim_ids, "\\|", perl=TRUE)[[1]])
+  
+  # create a row in new table for each of the split strings
+  # TODO: add intermediate step to trim "OMIM:" off the strings here
+  for (j in 1:length(omim_list)){
+    omim_group_df[nrow(omim_group_df)+1,] = c(disease_df[i,]$omim_group_id, omim_list[j])
+  }
+}
+
+disease_df = disease_df[ ,':='(`OMIM IDs`=NULL)] # drop the old omim list column
+head(disease_df,3)
+```
+
+```{r}
+# TODO: trim disease_id and mouse_mgi_id string values here
+
+# rename columns for sql convenience
+colnames(disease_df) = c("disease_id", "disease_name", "mouse_mgi_id", "omim_group_id")
+head(disease_df,2)
+```
+
+
+```{r}
+output_file = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/omim_groups.csv"
+fwrite(omim_group_df, output_file)
+head(omim_group_df)
+```
+
+
+```{r}
+procedure_col_names = c("group_id", "impc_parameter_orig_id")
+procedure_group_df = data.frame(matrix(nrow = 0, ncol = 2))
+colnames(procedure_group_df) = procedure_col_names
+
+for (i in 1:nrow(collapsed_df)) {
+  curr_row = collapsed_df[i,]
+  curr_impc_ids = curr_row$impcParameterOrigIds[[1]]
+  for (j in 1:length(curr_impc_ids)) {
+    procedure_group_df[nrow(procedure_group_df)+1,] = c(curr_row$procedure_group_id,curr_impc_ids[j])
+  }
+}
+```
+
+```{r}
+output_file2 = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/procedure_groups.csv"
+fwrite(procedure_group_df, output_file2)
+head(procedure_group_df)
+```
+
+```{r}
+disease = "Aicardi-Goutieres syndrome"
+group = disease_df[disease_df$`DO Disease Name`==disease,]$omim_group_id[1]
+omim_group_df[omim_group_df$group_id == group,]
+
+#TODO: collapse redundant rows (ones with only mouse MGI ID row different)
+#TODO: rename columns to not bad names
+```
+
+```{r}
+output_file3 = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/diseases_cleaned.csv"
+fwrite(disease_df, output_file3)
+head(disease_df)
+```
+
+```{r}
+# repeats_df = disease_df[duplicated(disease_df$`Mouse MGI ID`),]
+repeats_df = disease_df[duplicated(disease_df$`DO Disease ID`),]
+head(repeats_df)
+```
+
+```{r}
+disease_df[disease_df$`Mouse MGI ID`==95688,]
+```
+
+```{r}
+# clean_df = fread("./cleaned_combined.csv")
+# dupes = clean_df[duplicated(clean_df$GENE_ACCESSION_ID),]
+# setorder(dupes, "GENE_ACCESSION_ID")
+# head(dupes)
+```
+
+```{r}
+# dupes2 = clean_df[duplicated(clean_df$PARAMETER_NAME),]
+# dupes2
+```
+
+
+```{r}
+# dupes2 = clean_df[duplicated(clean_df$ANALYSIS_ID),]
+# setorder(dupes2, "GENE_ACCESSION_ID")
+# head(dupes2)
+```
+

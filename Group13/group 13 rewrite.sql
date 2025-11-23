@@ -1,79 +1,71 @@
-create database skibidy_toilet;
-use skibidy_toilet;
+CREATE DATABASE dcdm_mice_db;
+USE dcdm_mice_db;
 
+-- DROP TABLE diseases;
+-- DROP TABLE omim_groups;
+-- DROP TABLE mouse_data;
+-- DROP TABLE parameter_descriptions;
+-- DROP TABLE impc_procedures;
+-- DROP TABLE procedure_groups;
 
-#combined data table
-CREATE TABLE mouse_data (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    gene_accession_id VARCHAR(50),
-    gene_symbol VARCHAR(50),
-    mouse_strain VARCHAR(50),
-    mouse_life_stage VARCHAR(50),
-    parameter_id VARCHAR(50),
-    pvalue DOUBLE,
-    parameter_name VARCHAR(255),
-    analysis_id VARCHAR(100)
-    );
-    
-LOAD DATA LOCAL INFILE '/mnt/data/Cleaned_combined.csv'
-INTO TABLE combined_data
-FIELDS TERMINATED BY '\t'    -- your pasted sample looks tab-separated; if comma-separated use ','
-OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES
-(gene_accession_id, gene_symbol, mouse_strain, mouse_life_stage, parameter_id, pvalue, parameter_name, analysis_id);
+-- Please load table data in the same order as tables are created here.
+-- This ensures that foreign keys properly reference values, not causing errors.
 
-#table for parameter descriptions    
-    CREATE TABLE parameter_description (
-    parameter_id VARCHAR(80) PRIMARY KEY,
+-- table holding impc procedures and their descriptions
+-- relevant impc parameter ids stored in below procedure_groups
+CREATE TABLE impc_procedures (
+    is_mandatory BOOLEAN,
+    group_id INT PRIMARY KEY,
+    procedure_name VARCHAR(255),
+    procedure_description VARCHAR(600)
+);
+
+-- table for parameter descriptions    
+CREATE TABLE parameter_descriptions (
+    parameter_id VARCHAR(100),
     parameter_name VARCHAR(512),
     parameter_description TEXT,
-    procedure_group_id int,
-    IMPC_parameter_orig_id int
+    impc_parameter_orig_id INT PRIMARY KEY,
+    procedure_group_id INT,
+    FOREIGN KEY (procedure_group_id) REFERENCES impc_procedures(group_id)
 );
 
-LOAD DATA LOCAL INFILE '/mnt/data/IMPC_parameter_description_clean.csv'
-INTO TABLE parameter
-FIELDS TERMINATED BY ','    -- change to '\t' if that file is tab-separated
-OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES
-(parameter_id, name, description);
-
-CREATE TABLE procedure_table (
-    is_mandatory boolean,
-    procedure_group_id int PRIMARY KEY,
-    procedure_name VARCHAR(255),
-    procedure_description VARCHAR(255)
+-- combined data table
+CREATE TABLE mouse_analyses (
+    gene_accession_id VARCHAR(100),
+    gene_symbol VARCHAR(100),
+    mouse_strain VARCHAR(100),
+    mouse_life_stage VARCHAR(100),
+    parameter_id VARCHAR(100),
+    pvalue DOUBLE,
+    parameter_name VARCHAR(255),
+    analysis_id VARCHAR(100) PRIMARY KEY -- ,
+    -- FOREIGN KEY (parameter_id) REFERENCES parameter_descriptions(parameter_id)
 );
 
-CREATE TABLE disease (
-    disease_id VARCHAR(80),
-    gene_symbol VARCHAR(80),
+-- ALTER TABLE mouse_analyses ADD FOREIGN KEY (parameter_id) REFERENCES parameter_descriptions(parameter_id);
+-- ALTER TABLE parameter_descriptions ADD FOREIGN KEY (impc_parameter_orig_id) REFERENCES procedure_groups(impc_parameter_orig_id);
+-- ALTER TABLE impc_procedures MODIFY COLUMN procedure_description VARCHAR(600);
+-- ALTER TABLE procedure_groups ADD FOREIGN KEY (group_id) REFERENCES impc_procedures(procedure_group_id);
+
+CREATE TABLE diseases (
+    disease_id VARCHAR(100),
     disease_name VARCHAR(255),
-    source VARCHAR(50),
-    PRIMARY KEY (disease_id, gene_symbol),
-    INDEX idx_disease_gene (gene_symbol)
+    omim_group_id INT PRIMARY KEY,
+    mouse_mgi_id VARCHAR(100)
 );
 
-create table disease_omims (
-    group_id int,
-    omim_id varchar(100)
-    );
-
-CREATE TABLE parameter_group (
-    group_id INT AUTO_INCREMENT PRIMARY KEY,
-    IMPC_parameter_orig_id varchar(100),
-    group_name VARCHAR(100) UNIQUE,
-    description TEXT
-);
-
-#potential
-CREATE TABLE parameter_group_membership (
+create table omim_groups (
+	id INT PRIMARY KEY AUTO_INCREMENT,
     group_id INT,
-    parameter_id VARCHAR(80),
-    PRIMARY KEY (group_id, parameter_id),
-    INDEX idx_pg_parameter (parameter_id),
-    FOREIGN KEY (group_id) REFERENCES parameter_group(group_id) ON DELETE CASCADE,
-    FOREIGN KEY (parameter_id) REFERENCES parameter(parameter_id) ON DELETE CASCADE
+    omim_id VARCHAR(100),
+    FOREIGN KEY (group_id) REFERENCES diseases(omim_group_id)
 );
+
+-- alter table mouse_data drop constraint mouse_data_ibfk_1;
+
+-- alter table diseases add foreign key (omim_group_id) references omim_groups(group_id);
+
+-- # optional (?) link table for many-to-many relationship
+-- # btwn mouse_data.gene_accession_id and diseases.mouse_mgi_id
+-- #create table mice_diseases_link (

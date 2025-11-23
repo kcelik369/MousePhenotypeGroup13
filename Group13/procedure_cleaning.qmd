@@ -3,69 +3,139 @@ title: "procedureClean"
 format: html
 ---
 
+### FILE USAGE
+- This file should be run after "Parameter code.R", which cleans the parameter descriptions file.
+- This file cleans the procedures table, links it to parameter descriptions table via a new table, and modifies the cleaned version of the parameter descriptions table
+
+```{r}
+library(data.table)
+library(dplyr)
+library(readr)
+library(stringr)
+```
+
 ```{r}
 # read in the IMPC procedures file
 proc_filepath = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/IMPC_procedure.csv"
 proc_file = fread(proc_filepath)
+head(proc_file,3)
 ```
+
+```{r}
+# see that impcParamOrigId is initially unique
+proc_file[duplicated(proc_file$impcParameterOrigId),]
+```
+
 
 ```{r}
 # group by redundant columns, then use summarise to 
 # create a list of all impcParameterOrigId values for the grouped redundant rows
 collapsed_df = proc_file %>% group_by(name, description, isMandatory) %>% summarise(impcParameterOrigIds=list(impcParameterOrigId))
-head(collapsed_df)
+head(collapsed_df, 3)
 ```
 
 
 ```{r}
-# add a new row "procedure_group_id", will be foreign key down the line
-collapsed_df$procedure_group_id = c(1:nrow(collapsed_df))
+# add a new row "group_id", will be foreign key in SQL
+# this represents the group of impc_parameters for this procedure
+collapsed_df$group_id = c(1:nrow(collapsed_df))
 head(collapsed_df)
-
 ```
+
+```{r}
+# sql doesnt like booleans
+collapsed_df$isMandatory = as.numeric(collapsed_df$isMandatory)
+
+# remove impcParameterOrigIds from written table,
+# this will info will be preserved via the link between this table
+# and the cleaned parameter descriptions table
+final_collapsed_df = collapsed_df[,-4]
+head(final_collapsed_df,3)
+```
+
+```{r}
+# double check description length for SQL insert
+max(nchar(collapsed_df$description))
+```
+
+
+```{r}
+# rename columns for sql table creation convenience
+colnames(final_collapsed_df) = c("procedure_name", "procedure_description", 
+                                 "is_mandatory", "group_id")
+head(final_collapsed_df)
+```
+
 
 ```{r}
 # write out the cleaned table to a new file
+# this now contains no duplicate procedures
 new_filepath = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/IMPC_procedure_clean.csv"
-fwrite(collapsed_df, new_filepath)
+fwrite(final_collapsed_df, new_filepath)
 ```
 
 ```{r}
-# read in the cleaned IMPC_param_dsc CSV and add column with the "procedure_group_id"
+# read in the cleaned IMPC_param_desc CSV to add column with the "procedure_group_id"
 param_descs_clean_filepath = "./IMPC_parameter_description_clean.csv"
 param_descs_clean = fread(param_descs_clean_filepath)
 head(param_descs_clean)
 ```
 
 ```{r}
-# create a new numerical column to store parameter group id (new fkey)
-param_descs_clean[,"impcParameterGroupId"] = 0
-head(param_descs_clean)
+# use duplicated to find a column with all distinct values, for sql
+repeats_df = param_descs_clean[duplicated(param_descs_clean$impc_parameter_orig_id),]
+head(repeats_df)
 ```
 
 
 ```{r}
-# for all rows in the cleaned parameter descriptions file, add the new foreign key for 
-# our procedure table; preserve impc_parameter_orig_id just in case necessary later on.
-for (i in 1:nrow(param_descs_clean)) {
-  if (i%%1000 == 0) { print(i) } # progress bar (sort of)
-  for (j in 1:nrow(collapsed_df)) {
-    # find which group of impc_parameter_orig_ids now holds the current row's
-    if (param_descs_clean[i,]$impc_parameter_orig_id %in% collapsed_df[j,]$impcParameterOrigIds[[1]]) {
-      param_descs_clean[i,5] = collapsed_df[j,]$procedure_group_id # insert into new column of current row
-      break
-    }
+# create a new numerical column to store parameter group id (new fkey)
+# 0 is an invalid group due to creation process, letting us spot malfunctions
+param_descs_clean[,"procedure_group_id"] = 0
+head(param_descs_clean)
+```
+
+```{r}
+# for each procedure, associate each procedure with all of the impcParameterOrigIds
+# in its condensed list
+for (i in 1:nrow(collapsed_df)) {
+  curr_row = collapsed_df[i,] # current procedure row data
+  curr_impc_ids = curr_row$impcParameterOrigIds[[1]] # access impc id list
+  for (j in 1:length(curr_impc_ids)) {
+    # get current impc_id
+    curr_id = curr_impc_ids[j]
+    
+    # find relevant row in param_desc table,
+    # then place current group_id in procedure_group_id of param_desc table
+    param_descs_clean[param_descs_clean$impc_parameter_orig_id == curr_id,]$procedure_group_id = curr_row$group_id
   }
 }
-head(param_descs_clean)
+head(param_descs_clean,10)
 ```
 
 ```{r}
+# check that all procedures are represented in the param_descs table
+length(unique(param_descs_clean$procedure_group_id)) == nrow(collapsed_df)
+```
+
+```{r}
+# before writing modified parameter descriptions file, rename columns for sql
+colnames(param_descs_clean)
+colnames(param_descs_clean) = c("impc_parameter_orig_id","parameter_name","parameter_description",
+                                "parameter_id","procedure_group_id")
+head(param_descs_clean,2)
+```
+
+```{r}
+# write out cleaned parameter descriptions with added column
 fwrite(param_descs_clean, param_descs_clean_filepath)
 ```
 
 ```{r}
-# x = colnames(param_descs_clean)[1]
-# param_descs_clean[[x]]
+# we see that parameter_id is not unique because the same parameter
+# can be relevant to different procedures, and is then listed as a 
+# different param_orig_id
+dupes = param_descs_clean[duplicated(param_descs_clean$parameter_id),]
+dupes[parameter_id=="IMPC_ECG_001_001"][,-3]
 ```
 
