@@ -1,7 +1,7 @@
 library(data.table)
 
 #Set your folder containing the CSV files
-data_folder <- "/Users/hayashireiko/Desktop/Group13/data"
+data_folder <-  "https://raw.githubusercontent.com/kcelik369/MousePhenotypeGroup13/Group13/data"
 files <- list.files(data_folder, full.names = TRUE, pattern = "\\.csv$")
 
 # Step 1: Read the first file to get column headers
@@ -19,31 +19,26 @@ ref_t <- transpose(ref_raw[, .(V2)])   # transpose the values
 colnames(ref_t) <- column_names
 
 #step 2: Write the first row to the output CSV
-output_file <- "/Users/hayashireiko/Desktop/combined_data.csv"
+output_file <-  "https://raw.githubusercontent.com/kcelik369/MousePhenotypeGroup13/Group13/combined_data.csv"
 fwrite(ref_t, output_file)
 
 # Step 3: Loop through the remaining files and append to CSV
 for (i in 2:length(files)) {
-  dt <- fread(files[i], header = FALSE) #removes headers
+  dt <- fread(files[i], header = FALSE) #remove headers
   dt[, V1 := toupper(V1)] #capitalize first column
   dt <- dt[match(column_names, V1)] #sort by the reference order
   t_dt <- transpose(dt[, .(V2)])  
   colnames(t_dt) <- column_names
   
-  # Append to CSV without rewriting the header
   fwrite(t_dt, output_file, append = TRUE)
 }
 
-
 ##Cleaning data
 
-# Load libraries
 library(dplyr)
 library(readr)
 install.packages("openxlsx")
 library(openxlsx)
-# install.packages("BiocManager")
-# BiocManager::install("stringr")
 
 # Read in combined data file
 setwd("/Users/hayashireiko/Desktop/Group13")
