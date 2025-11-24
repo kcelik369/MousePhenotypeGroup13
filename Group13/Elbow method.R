@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyr)
 
 combined_data <- read.csv(
-  "/Users/hayashireiko/Documents/Cleaned_combined.csv",
+  "https://raw.githubusercontent.com/kcelik369/MousePhenotypeGroup13/Group13/Cleaned_combined.csv",
   stringsAsFactors = FALSE
 )
 
