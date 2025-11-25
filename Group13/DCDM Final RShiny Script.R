@@ -244,12 +244,14 @@ server <- function(input, output, session) {
     # Filter by cutoff
     df <- score_data[score_data$P_VALUE <= input$cutoff_pca, ]
     
+    if(nrow(df) == 0) return(NULL)
+    
     # Aggregate min P_VALUE per gene-phenotype
     temp <- aggregate(P_VALUE ~ GENE_SYMBOL + PHENOTYPE, data = df, FUN = min)
     temp$P_VALUE[is.na(temp$P_VALUE) | temp$P_VALUE == 0] <- 1e-5
     temp$LOGP <- -log10(temp$P_VALUE)
     
-    # Reshape for PCA
+    # Reshape for PCA (full matrix)
     mat <- reshape(temp[, c("GENE_SYMBOL", "PHENOTYPE", "LOGP")],
                    idvar = "GENE_SYMBOL", timevar = "PHENOTYPE", direction = "wide")
     mat[is.na(mat)] <- 1e-5
@@ -259,26 +261,28 @@ server <- function(input, output, session) {
     # PCA & clustering
     pca_res <- prcomp(mat_matrix, scale. = TRUE)
     set.seed(123)
-    cluster_assign <- kmeans(pca_res$x[, 1:2], centers = input$k_clusters)$cluster
+    cluster_assign <- kmeans(pca_res$x[, 1:2], centers = min(input$k_clusters, nrow(mat_matrix)))$cluster
     
-    # Merge cluster info back to original data
     cluster_df <- data.frame(
       GENE_SYMBOL = rownames(mat_matrix),
       Cluster = factor(cluster_assign),
       stringsAsFactors = FALSE
     )
     
-    cluster_table <- merge(
-      df,
-      cluster_df,
-      by = "GENE_SYMBOL"
-    )
+    cluster_table <- df %>%
+      group_by(GENE_SYMBOL) %>%
+      slice_min(P_VALUE, n = 1, with_ties = FALSE) %>%
+      ungroup()
+    
+    cluster_table$P_VALUE[cluster_table$P_VALUE == 0] <- 1e-5
+    
+    # Merge clusters from PCA
+    cluster_table <- merge(cluster_table, cluster_df, by = "GENE_SYMBOL")
     
     # Keep original columns + cluster
     cluster_table <- cluster_table %>%
-      filter(P_VALUE > 0) %>%                   # keep only valid gene-phenotype pairs
-      arrange(Cluster, P_VALUE) %>%             # sort by Cluster then P_VALUE
-      select(Cluster, GENE_SYMBOL, STRAIN, PHENOTYPE, PHENOTYPE_NAME, P_VALUE)  # keep columns
+      select(Cluster, GENE_SYMBOL, STRAIN, PHENOTYPE, PHENOTYPE_NAME, P_VALUE) %>%
+      arrange(Cluster, P_VALUE)
     
     datatable(
       cluster_table,
@@ -287,7 +291,6 @@ server <- function(input, output, session) {
     ) %>%
       formatSignif("P_VALUE", digits = 4)
   })
-  
   
 }
 
