@@ -1,0 +1,8 @@
+gene_accession_id,MGI:97491
+gene_symbol,Pax7
+mouse_strain,C57BL
+mouse_life_stage,E15.5
+parameter_id,IMPC_HEM_007_001
+pvalue,0.4913063
+parameter_name,Mean cell hemoglobin concentration
+analysis_id,3v2s45f11evjdcp

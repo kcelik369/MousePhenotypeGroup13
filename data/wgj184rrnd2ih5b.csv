@@ -1,0 +1,8 @@
+gene_accession_id,MGI:108398
+gene_symbol,Mlx
+mouse_strain,C57BL
+mouse_life_stage,Late adult
+parameter_id,CCP_LDT_006_001
+pvalue,0.1361756
+parameter_name,Latency to first transition into light
+analysis_id,wgj184rrnd2ih5b

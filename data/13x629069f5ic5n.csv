@@ -1,0 +1,8 @@
+gene_accession_id,mgi:1916340
+gene_symbol,Ascc1
+mouse_strain,C57BL
+mouse_life_stage,E18.5
+parameter_id,impc_abr_006_001
+pvalue,0.344973
+parameter_name,12kHz-evoked ABR Threshold
+analysis_id,13x629069f5ic5n
