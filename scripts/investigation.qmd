@@ -1,0 +1,131 @@
+---
+title: "geneInvestigation"
+format: html
+---
+
+```{r}
+library(data.table)
+library(dplyr)
+library(readr)
+library(openxlsx)
+library(stringr)
+library(biomaRt)
+library(BiocManager)
+```
+
+
+```{r}
+# filepath = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/combined_data.csv"
+filepath = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/cleaned_combined.csv"
+clean_df = read.csv(filepath)
+head(clean_df,2)
+```
+
+```{r}
+filt_df = clean_df[clean_df$GENE_SYMBOL == 'Ctnnbip1',]
+filt_df
+```
+
+```{r}
+length(unique(clean_df$GENE_ACCESSION_ID))
+```
+
+
+```{r}
+data_dir = "~/Documents/GitHub/MousePhenotypeGroup13/Group13/data"
+files <- list.files(data_folder, full.names = TRUE, pattern = "\\.csv$")
+
+cnames = c("id", "gene_accession_id", "col_title")
+new_df = data.frame(matrix(nrow = 0, ncol = 3))
+colnames(new_df) = cnames
+
+for (i in 1:length((files))) {
+  curr_file = fread(files[i], header=FALSE)
+  new_df[nrow(new_df)+1,] = c(i, toupper(curr_file[1,2][[1]]), toupper(curr_file[1,1][[1]]))
+}
+length(unique(new_df$gene_accession_id))
+head(new_df)
+```
+
+
+```{r}
+file = fread(files[1], header=FALSE)
+file[1,2][[1]]
+```
+
+```{r}
+unique(new_df$col_title)
+```
+
+```{r}
+install.packages('sjmisc')
+library('sjmisc')
+```
+
+
+```{r}
+# new2_df = filter(new_df, str_contains(gene_accession_id, "mgi", ignore.case = TRUE))
+new2_df = filter(new_df, col_title == "GENE_ACCESSION_ID")
+
+length(unique(new2_df$gene_accession_id))
+```
+
+```{r}
+nrow(new_df)
+nrow(new2_df)
+```
+
+```{r}
+colnames(clean_df)
+```
+
+```{r}
+length(unique(clean_df$PARAMETER_ID))
+```
+
+
+## CLEANING MERGED DATA SOME MORE
+```{r}
+my_cut = function (my_str, my_start=1) {
+  str_len = nchar(my_str)
+  cut_str = as.integer(substr(my_str, my_start, str_len))
+  return (cut_str)
+}
+
+clean_df$GENE_ACCESSION_ID = my_cut(clean_df$GENE_ACCESSION_ID, 5)
+head(clean_df)
+```
+
+```{r}
+count_unique = function(my_col) {
+  return(length(unique(my_col)))
+}
+
+sapply(clean_df, count_unique)
+```
+
+```{r}
+clean_df$GENE_SYMBOL = toupper(clean_df$GENE_SYMBOL)
+clean_df$MOUSE_STRAIN = toupper(clean_df$MOUSE_STRAIN)
+clean_df$MOUSE_LIFE_STAGE = str_to_sentence(clean_df$MOUSE_LIFE_STAGE)
+clean_df$PARAMETER_ID = toupper(clean_df$PARAMETER_ID)
+clean_df$PARAMETER_NAME = str_to_sentence(clean_df$PARAMETER_NAME)
+clean_df$ANALYSIS_ID = tolower(clean_df$ANALYSIS_ID)
+head(clean_df)
+```
+
+```{r}
+sapply(clean_df, count_unique)
+```
+
+```{r}
+clean_df[,1:2]
+uniq_ids = unique(clean_df$GENE_ACCESSION_ID)
+count=FALSE
+for (i in 1:length(uniq_ids)) {
+  id = uniq_ids[i]
+  count = count & (length(unique(clean_df[clean_df$GENE_ACCESSION_ID==id,]$GENE_SYMBOL)) > 1)
+}
+count
+```
+

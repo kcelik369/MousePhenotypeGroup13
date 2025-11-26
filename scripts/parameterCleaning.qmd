@@ -1,0 +1,223 @@
+---
+title: "parameterCleaning"
+format: html
+---
+
+## FILE USAGE
+To be run before procedureCleaning.qmd, which further modifies the parameter table.
+This file is only responsible for cleaning the origin parameter_descriptions table.
+
+```{r}
+library(readr)
+library(dplyr)
+library(janitor)
+```
+
+```{r}
+# read raw data
+base_path = "~/Documents/GitHub/MousePhenotypeGroup13/"
+read_path = "originals/IMPC_parameter_description.csv"
+param_raw <- read_csv(str_c(base_path, read_path), show_col_types = FALSE)
+
+# create new table to store cleaned data
+param_clean <- param_raw %>% janitor::clean_names()
+head(param_clean, 3)
+```
+
+```{r}
+# notice full duplication other than impc_param_orig_id field
+param_clean[param_clean$name=="Number of signals",]
+```
+
+
+```{r}
+# iterate through columns by name
+for (col in names(param_clean)) {
+  vec <- param_clean[[col]]
+  if (is.factor(vec)) { # change to string if necessary
+    vec <- as.character(vec)
+  }
+  if (is.character(vec)) {
+    vec <- trimws(vec) # remove whitespace if necessary
+    param_clean[[col]] <- vec
+  } else {
+    param_clean[[col]] <- vec
+  }
+}
+
+param_clean <- param_clean %>%
+  filter(!(if_all(everything(), ~ is.na(.) | . == "")))
+
+param_clean <- param_clean %>% distinct()
+head(param_clean, 3)
+```
+
+```{r}
+# remove description from impc_df, which will be obtainable via SQL join
+impc_df = param_clean[,-3]
+head(impc_df, 3)
+```
+
+```{r}
+# check for repeats
+nrow(impc_df) == length(unique(impc_df$impc_parameter_orig_id)) # no repeats
+nrow(impc_df) == length(unique(impc_df$parameter_id)) # as expected, has repeats
+```
+
+```{r}
+# read in parameter groupings, add to impc_df where relevant
+excel_path = str_c(base_path, "output/Groupings.csv")
+excel_df = fread(excel_path)
+head(excel_df)
+```
+
+```{r}
+# reduce columns to relevant, rename to convenient strings
+excel_df = excel_df[, -4]
+colnames(excel_df)[1] = "param_grouping"
+head(excel_df, 2)
+```
+
+```{r}
+# no repetition detected
+length(unique(excel_df$impc_parameter_orig_id)) == nrow(excel_df)
+```
+
+```{r}
+# create new column on impc_df to store the groupings we manually created;
+# some parameters will not be grouped, so start with NA as default value
+impc_df[,"param_grouping"] = NA
+head(impc_df)
+```
+
+
+```{r}
+# loop through grouping assingments to parameters, find them in the 
+# impc_df table, and assign the relevant param_grouping value
+checkValid = TRUE
+for (i in 1:nrow(excel_df)) {
+  curr_row = excel_df[i,]
+  curr_impc_id = curr_row$impc_parameter_orig_id
+  impc_df[impc_df$impc_parameter_orig_id == curr_impc_id, ]$param_grouping = curr_row$param_grouping
+  
+  # additionally ensure parameter_ids match
+  checkValid = checkValid & (impc_df[impc_df$impc_parameter_orig_id == curr_impc_id, 3][[1]] == curr_row$parameter_id)
+}
+
+# we use impc_parameter_orig_id to match grouping to impc_parameter, 
+# checkValid checks that parameter_id also matched for all rows;
+# a mismatch would create a false value, turning checkValid FALSE 
+# throughout the loop
+checkValid
+```
+
+```{r}
+# confirm all our groupings have been stored
+unique(impc_df$param_grouping)
+```
+
+```{r}
+# confirm the number of rows with groups is equal to the number of rows in the
+# original groupings table
+nrow(impc_df[!is.na(impc_df$param_grouping),]) == nrow(excel_df)
+```
+
+```{r}
+# rename for convenience & check state of impc_df table
+colnames(impc_df)[2] = 'parameter_name'
+head(impc_df[!is.na(impc_df$param_grouping),])
+```
+
+```{r}
+# create separate table for parameters so that we have a unique identifier
+# to move from procedures all the way to our merged analyses table
+
+# keep only essential columns, rename for convenience
+param_df = param_clean[,-1]
+colnames(param_df) = c("parameter_name", "parameter_description", "parameter_id")
+head(param_df, 3)
+```
+
+```{r}
+# demonstrate impc_params and parameters are distinct in quantities
+param_df = unique(param_df)
+nrow(impc_df) != nrow(param_df)
+cat("Number of redundant rows reduced: ", nrow(impc_df) - nrow(param_df))
+```
+
+```{r}
+# read in the merged analyses table
+merged_path = str_c(base_path, "output/combined_data.csv")
+merged_df = fread(merged_path)
+
+# get parameter-relevant columns
+new_params_df = merged_df[,c(5,7)]
+head(new_params_df, 2)
+```
+
+```{r}
+# count the number of missing descriptions before modification
+old = nrow(param_df[is.na(param_df$parameter_description),])
+
+# check if we can reduce parameters from merged analyses table
+nrow(new_params_df) != nrow(unique(new_params_df))
+new_params_df = unique(new_params_df) # we can
+```
+
+```{r}
+count = 0 # count for later information
+
+# we have established that parameter_id is not necessarily unique, so we now use
+# parameter_id and parameter_name in combination
+
+# for each unique param_id/name combination from the merged analyses table
+for (i in 1:nrow(new_params_df)) {
+  curr_row = new_params_df[i,]
+  overlap = param_df[param_df$parameter_id == curr_row$PARAMETER_ID,]$parameter_name
+  
+  # if that param_id/name combination is not present, then add it to the parameters table
+  if ((length(overlap) == 0) | !(curr_row$PARAMETER_NAME %in% overlap)) {
+    param_df[nrow(param_df)+1,] = list(curr_row$PARAMETER_NAME, NA, curr_row$PARAMETER_ID)
+  } else { # otherwise, count the number of times we don't add
+    count = count + 1
+  }
+}
+tail(param_df) # check the end to see our additions
+```
+
+```{r}
+# we about double the size of the parameters; given that the
+# merged_analyses data is our most important table and the number of 
+# added parameters is not too egregious, this additive approach is acceptable
+cat("Number parameters already present: ", count, "\n")
+
+# confirm we don't mess up the old data by referencing old N/A count
+cat("Number new parameters added: ", nrow(new_params_df) - count, "\n")
+cat("Number new N/A descriptions: ", nrow(param_df[is.na(param_df$parameter_description),]) - old)
+```
+
+```{r}
+# demonstrate prior lack of one added param as example
+param_df[param_df$parameter_name == "Contact righting",]
+```
+
+```{r}
+# SQL Error [1062] [23000]: Duplicate entry 'IMPC_GRS_001_001-Forelimb grip strength measurement' for key 'parameters.PRIMARY'
+#   Duplicate entry 'IMPC_GRS_001_001-Forelimb grip strength measurement' for key 'parameters.PRIMARY'
+#   Duplicate entry 'IMPC_GRS_001_001-Forelimb grip strength measurement' for key 'parameters.PRIMARY'
+param_df[param_df$parameter_id == "IMPC_GRS_001_001",]
+```
+
+
+```{r}
+# save the new tables
+
+# linking procedures and parameters using impc_parameter_orig_id
+write_path1 = "output/IMPC_procedure_params.csv"
+write_csv(impc_df, str_c(base_path, write_path1))
+
+# linking merged analyses and IMPC params using parameter_id/name
+write_path2 = "output/parameters.csv"
+write_csv(param_df, str_c(base_path, write_path2))
+```
+
