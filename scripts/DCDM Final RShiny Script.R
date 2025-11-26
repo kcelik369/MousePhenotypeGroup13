@@ -22,6 +22,11 @@ score_data <- combined_data %>%
   ) %>%
   distinct()
 
+# Prepare choices sorted alphabetically by phenotype name
+phen_choices <- score_data %>%
+  distinct(PHENOTYPE, PHENOTYPE_NAME) %>%
+  arrange(PHENOTYPE_NAME)  # sort alphabetically
+
 # UI
 ui <- fluidPage(
   titlePanel("IMPC Phenotype Dashboard"),
@@ -46,13 +51,18 @@ ui <- fluidPage(
                  DTOutput("gene_table")
                )
              )),
-    
     # Per Phenotype View
+    
     tabPanel("Per Phenotype View",
              sidebarLayout(
                sidebarPanel(
-                 selectInput("phen", "Select Phenotype:",
-                             choices = sort(unique(score_data$PHENOTYPE))),
+                 selectInput(
+                   "phen", "Select Phenotype:",
+                   choices = setNames(
+                     phen_choices$PHENOTYPE,
+                     paste0(phen_choices$PHENOTYPE_NAME, " - ", phen_choices$PHENOTYPE)
+                   )
+                 ),
                  sliderInput("cutoff_phen", "P-value cutoff:",
                              min = 0, max = 1, value = 0.05)
                ),
