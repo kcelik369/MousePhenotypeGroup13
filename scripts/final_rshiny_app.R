@@ -5,6 +5,7 @@ library(ggplot2)
 library(plotly)
 library(ggrepel)
 library(DT)
+library(stringr)
 
 # Change base path here
 base_path = "~/Documents/GitHub/MousePhenotypeGroup13/"
