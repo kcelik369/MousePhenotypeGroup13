@@ -1,25 +1,175 @@
-impc_parameter_orig_id,name,description,parameter_id
-38103,Coat - color - back,coat_color_back,IMPC_CSD_005_001
-38104,Coat - color - head,coat_color_head,IMPC_CSD_006_001
-38105,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
-38106,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
-38107,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
-38108,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
-38111,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
-38114,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
-31885,Coat - color - back,coat_color_back,IMPC_CSD_005_001
-31886,Coat - color - head,coat_color_head,IMPC_CSD_006_001
-31887,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
-31888,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
-31889,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
-31890,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
-31893,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
-31896,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
-16829,Coat - color - back,coat_color_back,IMPC_CSD_005_001
-16830,Coat - color - head,coat_color_head,IMPC_CSD_006_001
-16831,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
-16832,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
-16833,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
-16834,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
-16837,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
-16840,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
+Parameter Group,impc_parameter_orig_id,name,description,parameter_id
+Coat,38103,Coat - color - back,coat_color_back,IMPC_CSD_005_001
+Coat,38104,Coat - color - head,coat_color_head,IMPC_CSD_006_001
+Coat,38105,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
+Coat,38106,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
+Coat,38107,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
+Coat,38108,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
+Coat,38111,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
+Coat,38114,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
+Coat,31885,Coat - color - back,coat_color_back,IMPC_CSD_005_001
+Coat,31886,Coat - color - head,coat_color_head,IMPC_CSD_006_001
+Coat,31887,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
+Coat,31888,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
+Coat,31889,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
+Coat,31890,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
+Coat,31893,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
+Coat,31896,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
+Coat,16829,Coat - color - back,coat_color_back,IMPC_CSD_005_001
+Coat,16830,Coat - color - head,coat_color_head,IMPC_CSD_006_001
+Coat,16831,Coat - color - abdomen,coat_color_abdomen,IMPC_CSD_007_001
+Coat,16832,Coat - color pattern - back,coat_color_pattern_back,IMPC_CSD_008_001
+Coat,16833,Coat - color pattern - head,coat_color_pattern_head,IMPC_CSD_009_001
+Coat,16834,Coat - color pattern - abdomen,coat_color_pattern_abdomen,IMPC_CSD_010_001
+Coat,16837,Coat - hair distribution - abdomen,coat_hair_distribution_abdomen,IMPC_CSD_013_001
+Coat,16840,Coat - hair texture / appearance - abdomen,coat_hair_texture_appearance_abdomen,IMPC_CSD_016_001
+Weight,17596,Forelimb grip strength normalised against body weight,forelimb_grip_strength_normalised_against_body_weight,IMPC_GRS_010_001
+Weight,17597,Forelimb and hindlimb grip strength normalised against body weight,forelimb_and_hindlimb_grip_strength_normalised_against_body_weight,IMPC_GRS_011_001
+Weight,18994,BMC/Body weight,bmc_body_weight,IMPC_DXA_007_001
+Weight,18995,Lean/Body weight,lean_body_weight,IMPC_DXA_008_001
+Weight,18996,Fat/Body weight,fat_body_weight,IMPC_DXA_009_001
+Weight,47814,Spleen weight,spleen_weight,IMPC_OWT_002_001
+Weight,22507,Heart weight,heart_weight,IMPC_HWT_008_001
+Glucose,37395,Glucose,glucose,IMPC_CBC_018_001
+Glucose,18310,Fasted blood glucose concentration,NA,IMPC_IPG_010_001
+Glucose,18311,Initial response to glucose challenge,NA,IMPC_IPG_011_001
+Glucose,18312,Area under glucose response curve,NA,IMPC_IPG_012_001
+Glucose,30295,Glucose,glucose,IMPC_CBC_018_001
+Glucose,21469,Glucose,glucose,IMPC_CBC_018_001
+Chemistry,37378,Sodium,sodium,IMPC_CBC_001_001
+Chemistry,37380,Chloride,chloride,IMPC_CBC_003_001
+Chemistry,37381,Urea (Blood Urea Nitrogen - BUN),urea,IMPC_CBC_004_001
+Chemistry,37382,Creatinine,creatinine_enzymatic_method_preferred_,IMPC_CBC_005_001
+Chemistry,37383,Total protein,total_protein,IMPC_CBC_006_001
+Chemistry,37384,Albumin,albumin,IMPC_CBC_007_001
+Chemistry,37386,Calcium,calcium,IMPC_CBC_009_001
+Chemistry,37387,Phosphorus,phosphate,IMPC_CBC_010_001
+Chemistry,37388,Iron,iron,IMPC_CBC_011_001
+Chemistry,37389,Aspartate aminotransferase,aspartate_aminotransferase,IMPC_CBC_012_001
+Chemistry,37391,Alkaline phosphatase,alkaline_phosphatase,IMPC_CBC_014_001
+Chemistry,37392,Total cholesterol,total_cholesterol,IMPC_CBC_015_001
+Chemistry,37393,HDL-cholesterol,hdl_cholesterol,IMPC_CBC_016_001
+Chemistry,37394,Triglycerides,triglycerides,IMPC_CBC_017_001
+Chemistry,37400,Alpha-amylase,alpha_amylase,IMPC_CBC_023_001
+Chemistry,37405,Creatine kinase,creatine_kinase,IMPC_CBC_028_001
+Chemistry,37434,Cholesterol ratio,TC/HDLC ratio,IMPC_CBC_058_001
+Chemistry,37882,Insulin,insulin,IMPC_INS_001_001
+Chemistry,30278,Sodium,sodium,IMPC_CBC_001_001
+Chemistry,30280,Chloride,chloride,IMPC_CBC_003_001
+Chemistry,30281,Urea (Blood Urea Nitrogen - BUN),urea,IMPC_CBC_004_001
+Chemistry,30282,Creatinine,creatinine_enzymatic_method_preferred_,IMPC_CBC_005_001
+Chemistry,30283,Total protein,total_protein,IMPC_CBC_006_001
+Chemistry,30284,Albumin,albumin,IMPC_CBC_007_001
+Chemistry,30286,Calcium,calcium,IMPC_CBC_009_001
+Chemistry,30287,Phosphorus,phosphate,IMPC_CBC_010_001
+Chemistry,30288,Iron,iron,IMPC_CBC_011_001
+Chemistry,30289,Aspartate aminotransferase,aspartate_aminotransferase,IMPC_CBC_012_001
+Chemistry,30291,Alkaline phosphatase,alkaline_phosphatase,IMPC_CBC_014_001
+Chemistry,30292,Total cholesterol,total_cholesterol,IMPC_CBC_015_001
+Chemistry,30293,HDL-cholesterol,hdl_cholesterol,IMPC_CBC_016_001
+Chemistry,30294,Triglycerides,triglycerides,IMPC_CBC_017_001
+Chemistry,30300,Alpha-amylase,alpha_amylase,IMPC_CBC_023_001
+Chemistry,30305,Creatine kinase,creatine_kinase,IMPC_CBC_028_001
+Chemistry,30750,Insulin,insulin,IMPC_INS_001_001
+Chemistry,21452,Sodium,sodium,IMPC_CBC_001_001
+Chemistry,21454,Chloride,chloride,IMPC_CBC_003_001
+Chemistry,21455,Urea (Blood Urea Nitrogen - BUN),urea,IMPC_CBC_004_001
+Chemistry,21456,Creatinine,creatinine_enzymatic_method_preferred_,IMPC_CBC_005_001
+Chemistry,21457,Total protein,total_protein,IMPC_CBC_006_001
+Chemistry,21458,Albumin,albumin,IMPC_CBC_007_001
+Chemistry,21460,Calcium,calcium,IMPC_CBC_009_001
+Chemistry,21461,Phosphorus,phosphate,IMPC_CBC_010_001
+Chemistry,21462,Iron,iron,IMPC_CBC_011_001
+Chemistry,21463,Aspartate aminotransferase,aspartate_aminotransferase,IMPC_CBC_012_001
+Chemistry,21465,Alkaline phosphatase,alkaline_phosphatase,IMPC_CBC_014_001
+Chemistry,21466,Total cholesterol,total_cholesterol,IMPC_CBC_015_001
+Chemistry,21467,HDL-cholesterol,hdl_cholesterol,IMPC_CBC_016_001
+Chemistry,21468,Triglycerides,triglycerides,IMPC_CBC_017_001
+Chemistry,21474,Alpha-amylase,alpha_amylase,IMPC_CBC_023_001
+Chemistry,21479,Creatine kinase,creatine_kinase,IMPC_CBC_028_001
+Chemistry,21861,Insulin,insulin,IMPC_INS_001_001
+Hematology,29774,White blood cell count,white_blood_cell_count,IMPC_HEM_001_001
+Hematology,29775,Red blood cell count,red_blood_cell_count,IMPC_HEM_002_001
+Hematology,29776,Hemoglobin,hemoglobin,IMPC_HEM_003_001
+Hematology,29777,Hematocrit,hematocrit,IMPC_HEM_004_001
+Hematology,29778,Mean cell volume,mean_cell_volume,IMPC_HEM_005_001
+Hematology,29779,Mean corpuscular hemoglobin,mean_corpuscular_hemoglobin,IMPC_HEM_006_001
+Hematology,29780,Mean cell hemoglobin concentration,mean_cell_hemoglobin_concentration,IMPC_HEM_007_001
+Hematology,29781,Platelet count,platelet_count,IMPC_HEM_008_001
+Hematology,29798,Mean platelet volume,NA,IMPC_HEM_019_001
+Hematology,29799,Red blood cell distribution width,NA,IMPC_HEM_027_001
+Hematology,29801,Neutrophil differential count,A white blood cell (WBC) count measures the number of white blood cells in your blood. A WBC differential determines the percentage of each type of white blood cell present in your blood. A differential can also detect immature white blood cells or any abnormalities both of which are signs of a potential problem.,IMPC_HEM_029_001
+Hematology,29802,Neutrophil cell count,A white blood cell (WBC) count measures the number of white blood cells in your blood. A WBC differential determines the percentage of each type of white blood cell present in your blood. A differential can also detect immature white blood cells or any abnormalities both of which are signs of a potential problem.,IMPC_HEM_030_001
+Hematology,29803,Lymphocyte differential count,A white blood cell (WBC) count measures the number of white blood cells in your blood. A WBC differential determines the percentage of each type of white blood cell present in your blood. A differential can also detect immature white blood cells or any abnormalities both of which are signs of a potential problem.,IMPC_HEM_031_001
+Hematology,29807,Eosinophil differential count,A white blood cell (WBC) count measures the number of white blood cells in your blood. A WBC differential determines the percentage of each type of white blood cell present in your blood. A differential can also detect immature white blood cells or any abnormalities both of which are signs of a potential problem.,IMPC_HEM_035_001
+Hematology,29811,Large Unstained Cell (LUC) count,A white blood cell (WBC) count measures the number of white blood cells in your blood. A WBC differential determines the percentage of each type of white blood cell present in your blood. A differential can also detect immature white blood cells or any abnormalities both of which are signs of a potential problem.,IMPC_HEM_039_001
+Hematology,29812,Large Unstained Cell (LUC) differential count,NA,IMPC_HEM_040_001
+Hematology,21172,White blood cell count,white_blood_cell_count,IMPC_HEM_001_001
+Hematology,21173,Red blood cell count,red_blood_cell_count,IMPC_HEM_002_001
+Hematology,21174,Hemoglobin,hemoglobin,IMPC_HEM_003_001
+Hematology,21175,Hematocrit,hematocrit,IMPC_HEM_004_001
+Hematology,21176,Mean cell volume,mean_cell_volume,IMPC_HEM_005_001
+Hematology,21177,Mean corpuscular hemoglobin,mean_corpuscular_hemoglobin,IMPC_HEM_006_001
+Hematology,21178,Mean cell hemoglobin concentration,mean_cell_hemoglobin_concentration,IMPC_HEM_007_001
+Hematology,21179,Platelet count,platelet_count,IMPC_HEM_008_001
+Hematology,21197,Mean platelet volume,NA,IMPC_HEM_019_001
+Hematology,21198,Red blood cell distribution width,NA,IMPC_HEM_027_001
+ABR Threshold,29210,6kHz-evoked ABR Threshold,6khz_evoked_abr_threshold,IMPC_ABR_004_001
+ABR Threshold,29212,12kHz-evoked ABR Threshold,12khz_evoked_abr_threshold,IMPC_ABR_006_001
+ABR Threshold,29214,18kHz-evoked ABR Threshold,18khz_evoked_abr_threshold,IMPC_ABR_008_001
+ABR Threshold,29216,24kHz-evoked ABR Threshold,24khz_evoked_abr_threshold,IMPC_ABR_010_001
+ABR Threshold,29218,30kHz-evoked ABR Threshold,30khz_evoked_abr_threshold,IMPC_ABR_012_001
+ABR Threshold,18550,6kHz-evoked ABR Threshold,6khz_evoked_abr_threshold,IMPC_ABR_004_001
+ABR Threshold,18552,12kHz-evoked ABR Threshold,12khz_evoked_abr_threshold,IMPC_ABR_006_001
+ABR Threshold,18554,18kHz-evoked ABR Threshold,18khz_evoked_abr_threshold,IMPC_ABR_008_001
+ABR Threshold,18556,24kHz-evoked ABR Threshold,24khz_evoked_abr_threshold,IMPC_ABR_010_001
+ABR Threshold,18558,30kHz-evoked ABR Threshold,30khz_evoked_abr_threshold,IMPC_ABR_012_001
+Eye Morphology,46582,Eye Hemorrhage or Blood Presence,eye_hemorrhage_or_blood_presence,IMPC_EYE_003_001
+Eye Morphology,46586,Cornea,cornea,IMPC_EYE_007_001
+Eye Morphology,46595,Lens,lens,IMPC_EYE_016_001
+Eye Morphology,46596,Lens Opacity,lens_opacity,IMPC_EYE_017_001
+Eye Morphology,46597,Fusion between cornea and lens,fusion_between_cornea_and_lens,IMPC_EYE_018_001
+Eye Morphology,46600,Retinal Blood Vessels,retinal_blood_vessels,IMPC_EYE_024_001
+Eye Morphology,46602,Retinal Blood Vessels Pattern,retinal_blood_vessels_pattern,IMPC_EYE_026_001
+Eye Morphology,46633,Min right eye lens density,NA,IMPC_EYE_057_001
+Eye Morphology,46638,Right total retinal thickness,NA,IMPC_EYE_062_001
+Eye Morphology,46639,Right inner nuclear layer,NA,IMPC_EYE_063_001
+Eye Morphology,46640,Right outer nuclear layer,NA,IMPC_EYE_064_001
+Eye Morphology,46644,Left total retinal thickness,NA,IMPC_EYE_068_001
+Eye Morphology,46645,Left inner nuclear layer,NA,IMPC_EYE_069_001
+Eye Morphology,46646,Left outer nuclear layer,NA,IMPC_EYE_070_001
+Eye Morphology,46668,Retina (combined),NA,IMPC_EYE_092_001
+Eye Morphology,20254,Eye Hemorrhage or Blood Presence,eye_hemorrhage_or_blood_presence,IMPC_EYE_003_001
+Eye Morphology,20258,Cornea,cornea,IMPC_EYE_007_001
+Eye Morphology,20267,Lens,lens,IMPC_EYE_016_001
+Eye Morphology,20268,Lens Opacity,lens_opacity,IMPC_EYE_017_001
+Eye Morphology,20269,Fusion between cornea and lens,fusion_between_cornea_and_lens,IMPC_EYE_018_001
+Eye Morphology,20275,Retinal Blood Vessels,retinal_blood_vessels,IMPC_EYE_024_001
+Eye Morphology,20277,Retinal Blood Vessels Pattern,retinal_blood_vessels_pattern,IMPC_EYE_026_001
+Eye Morphology,20308,Min right eye lens density,NA,IMPC_EYE_057_001
+Eye Morphology,20313,Right total retinal thickness,NA,IMPC_EYE_062_001
+Eye Morphology,20314,Right inner nuclear layer,NA,IMPC_EYE_063_001
+Eye Morphology,20315,Right outer nuclear layer,NA,IMPC_EYE_064_001
+Eye Morphology,20319,Left total retinal thickness,NA,IMPC_EYE_068_001
+Eye Morphology,20320,Left inner nuclear layer,NA,IMPC_EYE_069_001
+Eye Morphology,20321,Left outer nuclear layer,NA,IMPC_EYE_070_001
+Eye Morphology,20343,Retina (combined),NA,IMPC_EYE_092_001
+Eye Morphology,85870,Eye Hemorrhage or Blood Presence,eye_hemorrhage_or_blood_presence,IMPC_EYE_003_001
+Eye Morphology,85874,Cornea,cornea,IMPC_EYE_007_001
+Eye Morphology,85883,Lens,lens,IMPC_EYE_016_001
+Eye Morphology,85884,Lens Opacity,lens_opacity,IMPC_EYE_017_001
+Eye Morphology,85885,Fusion between cornea and lens,fusion_between_cornea_and_lens,IMPC_EYE_018_001
+Eye Morphology,85888,Retinal Blood Vessels,retinal_blood_vessels,IMPC_EYE_024_001
+Eye Morphology,85890,Retinal Blood Vessels Pattern,retinal_blood_vessels_pattern,IMPC_EYE_026_001
+Eye Morphology,85921,Min right eye lens density,NA,IMPC_EYE_057_001
+Eye Morphology,85926,Right total retinal thickness,NA,IMPC_EYE_062_001
+Eye Morphology,85927,Right inner nuclear layer,NA,IMPC_EYE_063_001
+Eye Morphology,85928,Right outer nuclear layer,NA,IMPC_EYE_064_001
+Eye Morphology,85932,Left total retinal thickness,NA,IMPC_EYE_068_001
+Eye Morphology,85933,Left inner nuclear layer,NA,IMPC_EYE_069_001
+Eye Morphology,85934,Left outer nuclear layer,NA,IMPC_EYE_070_001
+Eye Morphology,85956,Retina (combined),NA,IMPC_EYE_092_002
+NKT Subsets,34558,CD4 NKT cells,NA,IMPC_IMM_011_001
+NKT Subsets,34568,CD4 CD25- NKT cells,NA,IMPC_IMM_021_001
+NKT Subsets,34571,DN CD25+ NKT cells,NA,IMPC_IMM_024_001
+NKT Subsets,34585,CD4 CD44+CD62L- NKT cells,NA,IMPC_IMM_040_001

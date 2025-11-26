@@ -1,0 +1,118 @@
+---
+title: "diseaseTables"
+format: html
+---
+
+## FILE USAGE
+- This file cleans/formats the diseases table, and modifies the table to obey first normal form by creating a new table to hold the lists of OMIM IDs.
+- The diseases table is also significantly culled based on lack of connectivity with the genes table. Given that the data our analysis is founded on is stored in the merged analyses table, there is no point in keeping diseases that have no connectivity to that table.
+
+```{r}
+library(data.table)
+library(dplyr)
+library(readr)
+library(stringr)
+```
+
+```{r}
+# load diseases table
+base_path = "~/Documents/GitHub/MousePhenotypeGroup13/"
+disease_filepath = "originals/Disease_information.csv"
+disease_df = fread(str_c(base_path, disease_filepath))
+
+# rename columns for convenience
+colnames(disease_df) = c("disease_id", "disease_name", "omim_ids", "mouse_mgi_id")
+head(disease_df)
+```
+
+```{r}
+# create a method to convert string fields to numbers
+my_cut = function (my_str, my_start=1) {
+  str_len = nchar(my_str)
+  cut_str = as.integer(substr(my_str, my_start, str_len))
+  return (cut_str)
+}
+
+# this above function works on the below fields, we have included an explanation
+# of why we do not use it in our discussion
+# disease_df$`DO Disease ID` = sapply(disease_df$`DO Disease ID`, my_cut, my_start=6)
+# disease_df$`Mouse MGI ID` = sapply(disease_df$`Mouse MGI ID`, my_cut, my_start=5)
+```
+
+```{r}
+# load in table of genes related to our analyses
+gene_path = str_c(base_path, "output/genes.csv")
+gene_df = fread(gene_path)
+head(gene_df)
+```
+
+```{r}
+relevant_genes = gene_df$gene_accession_id # get gene_ids as a list
+
+# filter diseases based on presence in relevant gene id list
+filt_disease_df = filter(disease_df, mouse_mgi_id %in% relevant_genes)
+head(filt_disease_df)
+```
+
+```{r}
+# we are storing a significant number of diseases that cannot be linked to 
+# the analysis data we have been given through our merge analyses data;
+# we save significant database space by removing the irrelevant rows but retain
+# those relationships in the original CSV if they become relevant when more 
+# rows are added to the merged analyses table
+
+# demonstrate significant reduction
+perc = (nrow(disease_df) - nrow(filt_disease_df)) / nrow(disease_df) * 100
+cat(perc, "% diseases not linked to genes from our analyses table \n")
+cat(nrow(filt_disease_df), "relevant diseases retained")
+```
+
+
+```{r}
+# to obey first normal form principle of databases, move list of omim_ids
+# into its own table linking an omim_id to an omim_group_id
+omim_group_col_names = c("group_id", "omim_id")
+omim_group_df = data.frame(matrix(nrow = 0, ncol = 2))
+colnames(omim_group_df) = omim_group_col_names
+omim_group_id = 1:nrow(filt_disease_df)
+
+filt_disease_df = cbind(filt_disease_df, omim_group_id) # create the new column
+filt_disease_df
+```
+
+```{r}
+# again here, we would use my_cut() method to clean OMIM IDs, but do not
+# for reasons explained in the discussion
+
+for (i in 1:nrow(filt_disease_df)) {
+  # get list of omim_ids for each row
+  curr_omim_ids = filt_disease_df[i,]$omim_ids
+
+  # split on the | character, requires regex; get list of split strings
+  omim_list = as.list(strsplit(curr_omim_ids, "\\|", perl=TRUE)[[1]])
+
+  # create a row in new table for each of the split strings
+  for (j in 1:length(omim_list)){
+    # this is where we would trim the OMIM ID strings
+    omim_group_df[nrow(omim_group_df)+1,] = c(filt_disease_df[i,]$omim_group_id, omim_list[j])
+  }
+}
+
+filt_disease_df = filt_disease_df[ ,':='(omim_ids=NULL)] # drop the old omim list column
+head(filt_disease_df,3)
+```
+
+```{r}
+# write out the OMIM groups table
+output_file = "output/omim_groups.csv"
+fwrite(omim_group_df, str_c(base_path, output_file))
+head(omim_group_df)
+```
+
+```{r}
+# write out the cleaned diseases table
+output_file3 = "output/diseases_cleaned.csv"
+fwrite(filt_disease_df, str_c(base_path, output_file3))
+head(filt_disease_df)
+```
+

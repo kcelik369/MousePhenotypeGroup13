@@ -6,10 +6,11 @@ library(plotly)
 library(ggrepel)
 library(DT)
 
-combined_data <- read.csv(
-  "https://raw.githubusercontent.com/kcelik369/MousePhenotypeGroup13/Group13/Cleaned_combined.csv",
-  stringsAsFactors = FALSE
-)
+# Change base path here
+base_path = "~/Documents/GitHub/MousePhenotypeGroup13/"
+comb_data_path = str_c(base_path, "output/combined_data.csv")
+
+combined_data <- read.csv(comb_data_path, stringsAsFactors = FALSE)
 
 score_data <- combined_data %>%
   transmute(

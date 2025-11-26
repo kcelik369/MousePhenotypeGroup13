@@ -1,7 +1,11 @@
 library(data.table)
+library(stringr)
+
+# Set base path here
+base_path = "~/Documents/GitHub/MousePhenotypeGroup13/"
 
 #Set your folder containing the CSV files
-data_folder <-  "https://raw.githubusercontent.com/kcelik369/MousePhenotypeGroup13/Group13/data"
+data_folder <- str_c(base_path, "data/")
 files <- list.files(data_folder, full.names = TRUE, pattern = "\\.csv$")
 
 # Step 1: Read the first file to get column headers
@@ -19,14 +23,14 @@ ref_t <- transpose(ref_raw[, .(V2)])   # transpose the values
 colnames(ref_t) <- column_names
 
 #step 2: Write the first row to the output CSV
-output_file <-  "https://raw.githubusercontent.com/kcelik369/MousePhenotypeGroup13/Group13/combined_data.csv"
+output_file <- str_c(base_path, "intermediate/combined_data.csv")
 fwrite(ref_t, output_file)
 
 # Step 3: Loop through the remaining files and append to CSV
 for (i in 2:length(files)) {
-  dt <- fread(files[i], header = FALSE) #remove headers
-  dt[, V1 := toupper(V1)] #capitalize first column
-  dt <- dt[match(column_names, V1)] #sort by the reference order
+  dt <- fread(files[i], header = FALSE) #removes headers
+  dt[, V1 := toupper(V1)] # capitalize first column
+  dt <- dt[match(column_names, V1)] # sort by the reference order
   t_dt <- transpose(dt[, .(V2)])  
   colnames(t_dt) <- column_names
   
@@ -34,27 +38,28 @@ for (i in 2:length(files)) {
 }
 
 ##Cleaning data
-
 library(dplyr)
 library(readr)
-install.packages("openxlsx")
 library(openxlsx)
+library(biomaRt)
+library(BiocManager)
 
 # Read in combined data file
-setwd("/Users/hayashireiko/Desktop/Group13")
-combined_data <- read.csv("combined_data.csv")
-sop <- read.csv("IMPC_SOP.csv")
+setwd(base_path)
+combined_data <- read.csv("intermediate/combined_data.csv")
+sop <- read.csv("originals/IMPC_SOP.csv")
 
 #Capitalize variable names (rows) in "combined_data" file
 sop[, 1] <- toupper(sop[, 1])  
 names(sop)
-write.csv(sop, "IMPC_sop_capitalized.csv", row.names = FALSE)
-sop <- read.csv("IMPC_sop_capitalized.csv")
+intermed_sop = "intermediate/IMPC_sop_capitalized.csv"
+write.csv(sop, intermed_sop, row.names = FALSE)
+sop <- read.csv(intermed_sop)
 
 
 # 1.Function that checks P-values are float values between 0 and 1
 clean_pvalues <- function(input_file,
-                          output_folder = "output",
+                          output_folder = "intermediate",
                           output_csv = "cleaned_pvalue.csv",
                           output_excel = "highlighted_invalid_pvalue.xlsx") {
   
@@ -85,7 +90,6 @@ clean_pvalues <- function(input_file,
   write.csv(df, csv_path, row.names = FALSE)
   
   #Excel with red cell highlighting
-  
   wb <- createWorkbook()
   addWorksheet(wb, "Data")
   writeData(wb, "Data", df_original)
@@ -109,14 +113,15 @@ clean_pvalues <- function(input_file,
           "Excel with red-highlighted invalid PVALUEs saved to: ", excel_path)
 }
 
-clean_pvalues("combined_data.csv")
+
+clean_pvalues(output_file)
 
 
 
 # 2.Function that checks that all values (apart from PVALUE) are strings
 # This function only outputs new csv files if there are any invalid data types
 ensure_strings_in_other_columns <- function(input_clean_csv,
-                                            output_folder = "output",
+                                            output_folder = "intermediate",
                                             output_csv = "string_checked_output.csv",
                                             output_excel = "highlighted_nonstring.xlsx") {
 
@@ -196,16 +201,16 @@ ensure_strings_in_other_columns <- function(input_clean_csv,
           "Excel saved to: ", excel_path)
 }
 
-ensure_strings_in_other_columns("output/cleaned_pvalue.csv")
+ensure_strings_in_other_columns("intermediate/cleaned_pvalue.csv")
 
 
 # 3.Function that checks the length of values
 check_length <- function(df, curr_sop, vars,
-                                     final_csv = "output/all_lengths_cleaned.csv",
-                                     final_excel = "output/invalid_lengths_highlight.xlsx") {
+                                     final_csv = "intermediate/all_lengths_cleaned.csv",
+                                     final_excel = "intermediate/invalid_lengths_highlight.xlsx") {
   
   # Make output folder if missing
-  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  if (!dir.exists("intermediate")) dir.create("intermediate", recursive = TRUE)
   
   # Original (for Excel)
   df_original <- df
@@ -287,15 +292,15 @@ vars_to_check <- c(
   "ANALYSIS_ID"
 )
 
-cleaned_pvalue <- read.csv("output/cleaned_pvalue.csv")
+cleaned_pvalue <- read.csv("intermediate/cleaned_pvalue.csv")
 final_df <- check_length(cleaned_pvalue, sop, vars_to_check)
 
 # 4.Function that checks that the values for ANALYSIS_ID and GENE_ACCESSION_ID are alphanumeric
 
 check_alphanumeric_validity <- function(df,
                               alphanumeric_val = c("ANALYSIS_ID", "GENE_ACCESSION_ID"),
-                              final_csv = "output/alphanumeric_validity_checked.csv",
-                              final_excel = "output/alphanumeric_invalid_highlight.xlsx") {
+                              final_csv = "intermediate/alphanumeric_validity_checked.csv",
+                              final_excel = "intermediate/alphanumeric_invalid_highlight.xlsx") {
   
   # Trim whitespace for entire df copy
   df_original <- df
@@ -344,9 +349,9 @@ check_alphanumeric_validity <- function(df,
   }
   
 
-  # CASE 2: Invalid values exist → create output files
+  # CASE 2: Invalid values exist → create intermediate files
 
-  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  if (!dir.exists("intermediate")) dir.create("intermediate", recursive = TRUE)
   
   # Save cleaned CSV
   write.csv(df_clean, final_csv, row.names = FALSE)
@@ -377,7 +382,7 @@ check_alphanumeric_validity <- function(df,
   return(results)
 }
 
-df <- read.csv("output/all_lengths_cleaned.csv")
+df <- read.csv("intermediate/all_lengths_cleaned.csv")
 
 results <- check_alphanumeric_validity(df)
 
@@ -390,14 +395,14 @@ results <- check_alphanumeric_validity(df)
 validate_and_correct_mouse_genes <- function(
     df,
     gene_col = "GENE_SYMBOL",
-    final_csv = "output/gene_symbols_corrected.csv",
-    final_excel = "output/gene_symbols_highlighted.xlsx"
+    final_csv = "intermediate/gene_symbols_corrected.csv",
+    final_excel = "intermediate/gene_symbols_highlighted.xlsx"
 ) {
   if (!gene_col %in% names(df)) {
     stop(paste("Column", gene_col, "not found in dataframe."))
   }
   
-  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  if (!dir.exists("intermediate")) dir.create("intermediate", recursive = TRUE)
   
   df_original <- df   # keep original for Excel highlighting
   
@@ -504,7 +509,7 @@ validate_and_correct_mouse_genes <- function(
 }
 
 
-df <- read.csv("output/all_lengths_cleaned.csv", stringsAsFactors = FALSE)
+df <- read.csv("intermediate/all_lengths_cleaned.csv", stringsAsFactors = FALSE)
 
 results <- validate_and_correct_mouse_genes(df)
 
@@ -563,22 +568,22 @@ check_id_gene_consistency <- function(
   }
 }
 
-df <- read.csv("output/gene_symbols_corrected.csv", stringsAsFactors = FALSE)
+df <- read.csv("intermediate/gene_symbols_corrected.csv", stringsAsFactors = FALSE)
 
 results <- check_id_gene_consistency(df)
 
 #7. Function that checks MOUSE_STRAIN
 validate_mouse_strain <- function(
     input_csv,
-    output_csv = "output/mouse_strain_cleaned.csv",
-    output_excel = "output/mouse_strain_invalid_highlight.xlsx",
+    output_csv = "intermediate/mouse_strain_cleaned.csv",
+    output_excel = "intermediate/mouse_strain_invalid_highlight.xlsx",
     column = "MOUSE_STRAIN",
     allowed = c("C57BL", "B6J", "C3H", "129SV")
 ) {
   df <- read.csv(input_csv, stringsAsFactors = FALSE)
   if (!column %in% names(df)) stop(paste("Column", column, "missing."))
   
-  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  if (!dir.exists("intermediate")) dir.create("intermediate", recursive = TRUE)
   
   df_original <- df
   df[[column]] <- trimws(df[[column]])
@@ -602,20 +607,20 @@ validate_mouse_strain <- function(
   df
 }
 
-validate_mouse_strain("output/gene_symbols_corrected.csv")
+validate_mouse_strain("intermediate/gene_symbols_corrected.csv")
 
 
 #8. Function that capitalizes all values for GENE_ACCESSION_ID and PARAMETER_ID
 capitalize_gene_and_parameter_ids <- function(
     input_csv,
-    output_csv = "output/capitalized_ids.csv",
+    output_csv = "intermediate/capitalized_ids.csv",
     cols = c("GENE_ACCESSION_ID", "PARAMETER_ID")
 ) {
   
   df <- read.csv(input_csv, stringsAsFactors = FALSE)
   
-  # Create output folder if needed
-  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  # Create intermediate folder if needed
+  if (!dir.exists("intermediate")) dir.create("intermediate", recursive = TRUE)
   
   # Capitalize values
   for (col in cols) {
@@ -628,22 +633,22 @@ capitalize_gene_and_parameter_ids <- function(
   df
 }
 
-capitalize_gene_and_parameter_ids("output/mouse_strain_cleaned.csv")
+capitalize_gene_and_parameter_ids("intermediate/mouse_strain_cleaned.csv")
 
 
 #9. Function that removes all non-IMPC values for PARAMETER_ID
 clean_parameter_id_prefix <- function(
     input_csv,
-    output_csv = "output/parameter_id_cleaned.csv",
-    output_excel = "output/parameter_id_invalid_highlight.xlsx",
+    output_csv = "intermediate/parameter_id_cleaned.csv",
+    output_excel = "intermediate/parameter_id_invalid_highlight.xlsx",
     column = "PARAMETER_ID"
 ) {
   
   # Read data
   df <- read.csv(input_csv, stringsAsFactors = FALSE)
   
-  # Create output folder if absent
-  if (!dir.exists("output")) dir.create("output", recursive = TRUE)
+  # Create intermediate folder if absent
+  if (!dir.exists("intermediate")) dir.create("intermediate", recursive = TRUE)
   
   df_original <- df
   
@@ -684,7 +689,7 @@ clean_parameter_id_prefix <- function(
   return(df)
 }
 
-clean_parameter_id_prefix("output/capitalized_ids.csv")
+clean_parameter_id_prefix("intermediate/capitalized_ids.csv")
 
 
 
@@ -713,7 +718,7 @@ check_duplicate_rows <- function(df) {
 }
 
 # Load your CSV file (make sure the file path is correct)
-df <- read.csv("output/gene_symbols_corrected.csv", stringsAsFactors = FALSE)
+df <- read.csv(str_c(base_path, "intermediate/capitalized_ids.csv"), stringsAsFactors = FALSE)
 
 # Call the function to check for duplicates
 duplicate_rows <- check_duplicate_rows(df)
@@ -723,6 +728,7 @@ if (!is.null(duplicate_rows)) {
   print(duplicate_rows)
 } else {
   message("No duplicate rows in the file.")
+  write.csv(df, str_c(base_path, "output/combined_data.csv"), row.names=FALSE)
 }
 
 

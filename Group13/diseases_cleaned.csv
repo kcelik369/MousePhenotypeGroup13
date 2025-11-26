@@ -1,0 +1,12 @@
+disease_id,disease_name,mouse_mgi_id,omim_group_id
+DOID:0110169,Charcot-Marie-Tooth disease axonal type 2P,MGI:2684789,1
+DOID:13270,erythropoietic protoporphyria,MGI:1347061,2
+DOID:0060539,Hermansky-Pudlak syndrome 1,MGI:1861441,3
+DOID:2223,platelet storage pool deficiency,MGI:1861441,4
+DOID:0110626,primary ciliary dyskinesia 2,MGI:3588207,5
+DOID:0110609,primary ciliary dyskinesia 23,MGI:1922184,6
+DOID:0111666,proliferative vasculopathy and hydranencephaly-hydrocephaly syndrome,MGI:2384974,7
+DOID:9074,systemic lupus erythematosus,MGI:1914267,8
+DOID:0090039,torsion dystonia 6,MGI:1921004,9
+DOID:9744,type 1 diabetes mellitus,MGI:88357,10
+DOID:0110034,X-linked Alport syndrome,MGI:88456,11

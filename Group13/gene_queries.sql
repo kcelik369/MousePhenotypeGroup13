@@ -30,3 +30,8 @@ SELECT ma.gene_symbol, d.disease_name FROM mouse_analyses ma
 -- SELECT disease_name FROM diseases WHERE mouse_mgi_id = "MGI:1859866";
 -- SELECT DISTINCT gene_accession_id FROM mouse_analyses WHERE gene_symbol = 'Fcsk';
 -- SELECT disease_name FROM diseases WHERE mouse_mgi_id = "MGI:1916071";
+
+-- demonstrates that disease-relation does exist, but not for our target genes
+SELECT DISTINCT ma.gene_symbol, d.disease_name FROM mouse_analyses ma 
+	INNER JOIN diseases d ON ma.gene_accession_id = d.mouse_mgi_id 
+	ORDER BY ma.gene_symbol; 
