@@ -1,0 +1,5 @@
+# File Explanations
+- db_create: Creates the tables using SQL queries; the commands were run via DBeaver. Note that the last set of commands is run after the data is loaded to reshape a column and its constituent data. Data loading process is not present; this process was done via the DBeaver UI.
+- db_diagram: diagram showing our tables, their rows and relationships; created using DBeaver.
+- dump-dcdm_[...].sql: stores the database dump of the final version of our database for easy reuse. This can be used to set up the database without manually creating and loading our data.
+- queries.sql: here we investigate the four genes of interest given to us in "../originals/query_genes.csv". This contains a query for all genes of interest and one for a single gene of interest. We found no overlap with diseases among our genes of interest, so that query and related further investigation was split out.
