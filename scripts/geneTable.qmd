@@ -38,37 +38,6 @@ head(genes_df, 3)
 ```
 
 ```{r}
-# d_path = str_c(base_path, "output/diseases_cleaned.csv")
-# disease_df = fread(d_path)
-# head(disease_df)
-```
-
-```{r}
-# nrow(genes_df)
-# length(unique(genes_df$gene_symbol))
-```
-
-
-```{r}
-# uniq_mgi_ids = unique(disease_df$mouse_mgi_id)
-# for (i in 1:length(uniq_mgi_ids)) {
-#   if (!(uniq_mgi_ids[i] %in% (genes_df$gene_accession_id))) {
-#     curr = list(uniq_mgi_ids[i], NA) # using c() treats NA poorly
-#     genes_df = rbind(genes_df, curr)
-#   }
-# }
-# 
-# tail(genes_df)
-```
-
-```{r}
-# nrow(genes_df)
-# length(unique(genes_df$gene_symbol))
-# length(uniq_mgi_ids)
-```
-
-
-```{r}
 # write out the genes table
 output_path = str_c(base_path, "output/genes.csv")
 fwrite(genes_df, output_path)

@@ -11,6 +11,8 @@ This file is only responsible for cleaning the origin parameter_descriptions tab
 library(readr)
 library(dplyr)
 library(janitor)
+library(stringr)
+library(data.table)
 ```
 
 ```{r}
@@ -220,4 +222,3 @@ write_csv(impc_df, str_c(base_path, write_path1))
 write_path2 = "output/parameters.csv"
 write_csv(param_df, str_c(base_path, write_path2))
 ```
-

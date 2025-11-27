@@ -50,7 +50,19 @@ SELECT DISTINCT ma.gene_symbol, d.disease_name FROM mouse_analyses ma
 	INNER JOIN diseases d ON g.gene_accession_id = d.mouse_mgi_id
 	ORDER BY ma.gene_symbol;
 
+-- parameter grouping query; use one of following: 'Coat', 'Weight', 'Glucose', 'ABR Threshold',
+-- 'Eye Morphology', 'Hematology', 'Chemistry', 'NKT Subsets'
 SELECT DISTINCT ROUND(ma.pvalue, 8), p.parameter_name, p.parameter_description, ipp.param_grouping FROM impc_param_procedures ipp 
 	LEFT JOIN parameter p ON ipp.parameter_id = p.parameter_id AND ipp.parameter_name = p.parameter_name
 	LEFT JOIN mouse_analyses ma ON ma.parameter_id = p.parameter_id AND ma.parameter_name = p.parameter_name
 	WHERE param_grouping = 'Weight';
+
+-- query spanning all tables in the database
+SELECT DISTINCT d.disease_name, g.gene_symbol, ma.parameter_name, p.parameter_description, 
+	ipp.param_grouping, ip.procedure_name FROM diseases d
+	INNER JOIN genes g ON g.gene_accession_id = d.mouse_mgi_id
+	INNER JOIN mouse_analyses ma ON g.gene_accession_id = ma.gene_accession_id
+	INNER JOIN parameters p ON ma.parameter_id = p.parameter_id AND ma.parameter_name = p.parameter_name
+	INNER JOIN impc_param_procedures ipp ON ipp.parameter_id = p.parameter_id AND ipp.parameter_name = p.parameter_name
+	INNER JOIN impc_procedures ip ON ipp.procedure_group_id = ip.group_id
+	WHERE ma.gene_symbol = 'Thap1' LIMIT 3;

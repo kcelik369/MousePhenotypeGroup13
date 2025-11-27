@@ -9,7 +9,9 @@ library(stringr)
 
 # Change base path here
 base_path = "~/Documents/GitHub/MousePhenotypeGroup13/"
-comb_data_path = str_c(base_path, "output/combined_data.csv")
+
+# uses merged dataset with only IMPC parameters instead of full param set
+comb_data_path = str_c(base_path, "intermediate/parameter_id_cleaned.csv")
 
 combined_data <- read.csv(comb_data_path, stringsAsFactors = FALSE)
 

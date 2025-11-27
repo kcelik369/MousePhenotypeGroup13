@@ -1,8 +1,14 @@
 library(dplyr)
 library(tidyr)
+library(stringr)
 
+# change base_path here if necessary
+base_path = "~/Documents/GitHub/MousePhenotypeGroup13/"
+
+# uses merged dataset with only IMPC parameters instead of full param set
+# matches use in R Shiny app
 combined_data <- read.csv(
-  "https://raw.githubusercontent.com/kcelik369/MousePhenotypeGroup13/Group13/Cleaned_combined.csv",
+  str_c(base_path, "intermediate/parameter_id_cleaned.csv"),
   stringsAsFactors = FALSE
 )
 
